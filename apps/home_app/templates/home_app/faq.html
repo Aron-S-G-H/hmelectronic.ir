@@ -1,0 +1,110 @@
+{% extends 'templates/base.html' %}
+{% block main %}
+    <!-- BREADCRUMB AREA START -->
+    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__breadcrumb-inner text-center">
+                        <h1 class="ltn__page-title">سوالات متداول</h1>
+                        <div class="ltn__breadcrumb-list">
+                            <ul>
+                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a><i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i></li>
+                                <li>سوالات متداول</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB AREA END -->
+
+    <!-- FAQ AREA START (faq-2) (ID > accordion_2) -->
+    <div class="ltn__faq-area mb-80">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="ltn__faq-inner ltn__faq-inner-2">
+                        <div id="accordion_2">
+                            <!-- card -->
+                            {% for q in frequently_questions %}
+                                {% if q.status %}
+                                    <div class="card">
+                                        <h6 class="collapsed ltn__card-title" data-toggle="collapse" data-target="#faq-item-{{ q.id }}"
+                                            aria-expanded="false">{{ q.question }}
+                                        </h6>
+                                        <div id="faq-item-{{ q.id }}" class="collapse" data-parent="#accordion_2">
+                                            <div class="card-body">
+                                                <p>{{ q.answer|safe }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="need-support text-center mt-100">
+                            <h4>به راهنمایی بیشتر نیاز دارید؟ با ما ارتباط برقرار کنید</h4>
+                            <div class="btn-wrapper mb-30" style="margin-top: 0">
+                                <a href="{% url 'contactUs:contact_page' %}" class="theme-btn-1 btn">تماس با ما</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <aside class="sidebar-area ltn__right-sidebar">
+                        <!-- Category Widget -->
+                    {% if base_categories %}
+                        {% for base_category in base_categories %}
+                            <div class="widget ltn__menu-widget">
+                                <h4 class="ltn__widget-title">دسته بندی {{ base_category.title }}</h4>
+                                <ul>
+                                    {% for category in base_category.main_categories.all %}
+                                        {% if category.title == 'براساس برند' and not category.parent%}
+                                            {% for sub in category.subs.all %}
+                                                <li>
+                                                    <a href="{% url 'product:categoryDetails_page' sub.id sub.slug %}">
+                                                        {{ sub.title }}
+                                                    </a>
+                                                </li>
+                                            {% endfor %}
+                                        {% elif category.base_category.title == 'یو پی اس و باتری' %}
+                                            {% if not category.parent and not category.title == 'براساس کاربرد' %}
+                                                <li>
+                                                    <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
+                                                        {{ category.title }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% elif category.base_category.title == 'تجهیزات سرمایشی و گرمایشی' %}
+                                             {% if not category.parent %}
+                                                 <li>
+                                                     <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
+                                                         {{ category.title }}
+                                                     </a>
+                                                 </li>
+                                             {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                        <!-- Tagcloud Widget -->
+                    {% if tags %}
+                        <div class="widget ltn__tagcloud-widget">
+                            <h4 class="ltn__widget-title">تگ های محصولات</h4>
+                            <ul>
+                                {% for tag in tags %}
+                                    <li><a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}">{{ tag.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FAQ AREA START -->
+{% endblock %}

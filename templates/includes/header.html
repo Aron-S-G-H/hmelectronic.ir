@@ -1,0 +1,168 @@
+{% load render_partial %}
+{% load humanize %}
+<!-- HEADER AREA START (header-3) -->
+<header class="ltn__header-area ltn__header-3 section-bg-6">
+    <!-- ltn__header-middle-area start -->
+    <div class="ltn__header-middle-area">
+        <div class="container">
+            <div class="row">
+                {% if logo %}
+                <div class="col">
+                    <div class="site-logo">
+                        <a href="{% url 'main:Home_Page' %}"><img src="{{ logo.img.url }}" alt="Logo" width=35%"></a>
+                        <span style="color: #e10000;font-size: small" class="font-weight-bolder">نماینده رسمی شرکت فاراتل</span>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="col header-contact-serarch-column d-none d-xl-block">
+                    <div class="header-contact-search" style="display: flex">
+                        <!-- header-feature-item -->
+                        {% if communication_ways.company_n.all %}
+                        <div class="header-feature-item">
+                            <div class="header-feature-icon">
+                                <i class="icon-phone"></i>
+                            </div>
+                            <div class="header-feature-info">
+                                <h6>تلفن</h6>
+                                {% for number in communication_ways.company_n.all %}
+                                <p>
+                                    <a href="tel:{{ number.province_code }}{{ number.number }}">
+                                        {{ number.province_code }}-{{ number.number }}
+                                    </a>
+                                </p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        <!-- header-search-2 -->
+                        <div class="header-search-2">
+                            <form id="searchForm" method="post" action="{% url 'product:shop_page' %}">
+                                {% csrf_token %}
+                                <input type="text" name="search" id="searchInput" placeholder="جست جو کنید..."/>
+                                <button type="submit" id="searchSubmitBtn">
+                                    <span><i class="icon-magnifier"></i></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <!-- header-options -->
+                    <div class="ltn__header-options">
+                        <ul>
+                            <li>
+                                <!-- user-menu -->
+                                <div class="ltn__drop-menu user-menu">
+                                    <ul>
+                                        <li>
+                                            <a><i class="icon-user"></i></a>
+                                            <ul>
+                                                {% if request.user.is_authenticated %}
+                                                    <li><span>{{ request.user.first_name }} {{ request.user.last_name }}</span></li>
+                                                    <li><a href="{% url 'account:logout' %}">خروج از حساب</a></li>
+                                                {% else %}
+                                                    <li><a href="{% url 'account:login' %}">ورود</a></li>
+                                                    <li><a href="{% url 'account:register' %}">ثبت نام</a></li>
+                                                {% endif %}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <!-- mini-cart 2 -سبد خرید -->
+                                <div class="mini-cart-icon mini-cart-icon-2">
+                                    <a href="#ltn__utilize-cart-menu" class="ltn__utilize-toggle">
+                                        <span class="mini-cart-icon">
+                                            <i class="icon-handbag"></i>
+                                            <sup>{{ cart.cart_quantity }}</sup>
+                                        </span>
+                                        <h6>
+                                            <span>سبد خرید شما</span> <span class="ltn__secondary-color">{{ cart.total|intcomma:False }} هزار تومن</span></h6>
+                                    </a>
+                                </div>
+                            </li>
+                            <li>
+                                <!-- Mobile Menu Button -->
+                                <div class="mobile-menu-toggle d-lg-none">
+                                    <a href="#ltn__utilize-mobile-menu" class="ltn__utilize-toggle">
+                                        <svg viewBox="0 0 800 600">
+                                            <path
+                                                    d="M300,220 C300,220 520,220 540,220 C740,220 640,540 520,420 C440,340 300,200 300,200"
+                                                    id="top"></path>
+                                            <path d="M300,320 L540,320" id="middle"></path>
+                                            <path
+                                                    d="M300,210 C300,210 520,210 540,210 C740,210 640,530 520,410 C440,330 300,190 300,190"
+                                                    id="bottom"
+                                                    transform="translate(480, 320) scale(1, -1) translate(-480, -318) ">
+                                            </path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ltn__header-middle-area end -->
+
+    <!-- header-bottom-area start -->
+    <div class="header-bottom-area ltn__border-top ltn__header-sticky  ltn__sticky-bg-white ltn__primary-bg---- menu-color-white---- d-none d-lg-block">
+        <div class="container">
+            <div class="row">
+                <div class="col header-menu-column justify-content-center">
+                    {% if logo %}
+                    <div class="sticky-logo">
+                        <div class="site-logo">
+                            <a href="{% url 'main:Home_Page' %}"><img src="{{ logo.img.url }}" alt="Logo" width="35%"></a>
+                            <span style="color: #e10000;font-size: small" class="font-weight-bolder">نماینده رسمی شرکت فاراتل</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="header-menu header-menu-2">
+                        <nav>
+                            <div class="ltn__main-menu">
+                                <ul>
+                                    <li class="menu-icon">
+                                        <a href="{% url 'main:Home_Page' %}" class="font-weight-bolder">صفحه اصلی</a>
+                                    </li>
+                                    {% for category in base_categories %}
+                                        <li class="menu-icon">
+                                            <span class="font-weight-bolder">{{ category.title }}</span>
+                                            {% render_partial 'product:categoryPartial' category.slug %}
+                                        </li>
+                                    {% endfor %}
+                                    <li class="menu-icon">
+                                        <a href="{% url 'blog:list' %}" class="font-weight-bolder">وبلاگ</a>
+                                    </li>
+                                    <li class="menu-icon">
+                                        <a href="{% url 'main:AboutUs_Page' %}" class="font-weight-bolder">درباره ما</a>
+                                    </li>
+                                    <li class="menu-icon">
+                                        <a href="{% url 'contactUs:contact_page' %}" class="font-weight-bolder">تماس با ما</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- header-bottom-area end -->
+    <script>
+        let searchSubmitBtn = document.getElementById('searchSubmitBtn');
+        let searchInput = document.getElementById('searchInput');
+
+        searchSubmitBtn.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (searchInput.value){
+                document.getElementById('searchForm').submit()
+            }
+        })
+    </script>
+
+</header>
+<!-- HEADER AREA END -->

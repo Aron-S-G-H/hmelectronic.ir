@@ -1,0 +1,56 @@
+{% load humanize %}
+<div id="ltn__utilize-cart-menu" class="ltn__utilize ltn__utilize-cart-menu">
+    <div class="ltn__utilize-menu-inner ltn__scrollbar">
+        <div class="ltn__utilize-menu-head">
+            <span class="ltn__utilize-menu-title">سبد خرید</span>
+            <button class="ltn__utilize-close">×</button>
+        </div>
+        {% if not cart.cart_quantity %}
+            <h6 class="alert alert-danger text-center">محصولی در سبد خرید نمی باشد</h6>
+        {% endif %}
+        <div class="mini-cart-product-area ltn__scrollbar">
+            {% for item in cart %}
+            <div class="mini-cart-item clearfix">
+                <div class="mini-cart-img">
+                    <a href="{% url 'product:productDetail_page' item.product.id item.product.slug %}">
+                        {% for product_image in item.product.images.all|slice:':1' %}
+                            <img src="{{ product_image.img.url }}" alt="{{ item.product.product_name }}">
+                        {% endfor %}
+                    </a>
+                    <span class="mini-cart-item-delete" onclick="removeFromCart('{{ item.unique_id }}')"><i class="icon-trash"></i></span>
+                </div>
+                <div class="mini-cart-info">
+                    <h6>
+                        <a href="{% url 'product:productDetail_page' item.product.id item.product.slug %}">{{ item.product.product_name }}</a>
+                    </h6>
+                    <span class="mini-cart-quantity">{{ item.price|intcomma:False }}x{{ item.quantity }} تومان</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="mini-cart-footer">
+            <div class="mini-cart-sub-total">
+                <h5>جمع خرید: <span>{{ cart.total|intcomma:False }} تومان</span></h5>
+            </div>
+            <div class="btn-wrapper">
+                <a href="{% url 'cart:detail_page' %}" class="theme-btn-1 btn btn-effect-1">مشاهده سبد خرید</a>
+                {% if not cart.cart_quantity %}
+                    <a href="#" class="theme-btn-2 btn btn-effect-2 disabled">پرداخت</a>
+                {% else %}
+                    <a href="{% url 'cart:checkOut_page' %}" class="theme-btn-2 btn btn-effect-2">پرداخت</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function removeFromCart(uniqueID){
+        axios.get(`/cart/remove/${uniqueID}`)
+            .then(response => {
+                if (response.data.status === 200){
+                    window.location.reload();
+                }
+            })
+            .catch(err => console.log(err))
+    }
+</script>

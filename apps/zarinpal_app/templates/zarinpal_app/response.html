@@ -1,0 +1,88 @@
+{% extends 'templates/base.html' %}
+{% block main %}
+
+    <!-- BREADCRUMB AREA START -->
+    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__breadcrumb-inner text-center">
+                        {% if status == 'SF' %}
+                            <h1 class="ltn__page-title">Zarinpal Transaction Succeed</h1>
+                        {% elif status == 'CT' %}
+                            <h1 class="ltn__page-title">Zarinpal Canceled Transaction</h1>
+                        {% elif status == 'TE' %}
+                            <h1 class="ltn__page-title">Zarinpal Timeout Error</h1>
+                        {% elif status == 'CE' %}
+                            <h1 class="ltn__page-title">Zarinpal Connection Error</h1>
+                        {% elif status == 'RSE' or status == 'TSE' %}
+                            <h1 class="ltn__page-title">
+                                {% if status == 'RSE' %}Zarinpal Response Status Error{% else %}Zarinpal Transaction Status Error{% endif %}
+                            </h1>
+                        {% elif status == 'SRRE' or status == 'SRSE' %}
+                            <h1 class="ltn__page-title">
+                                {% if status == 'SRRE' %}Zarinpal Send Request Response Error{% else %}Zarinpal Send Request Status Error{% endif %}
+                            </h1>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB AREA END -->
+
+    <div class="ltn__404-area ltn__404-area-1 mb-120">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="error-404-inner text-center">
+                    {% if stage == 'verify' %}
+                        {% if status == 'CT' %}
+                            <h2 class="text-danger">Canceled Transaction</h2>
+                            <h3>عملیات پرداخت لغو شد</h3>
+                            <p>در صورت نیاز به راهنمایی و مشاوره برای خرید میتوانید با ما تماس بگیرید</p>
+                        {% elif status == 'RSE' or status == 'TSE' %}
+                            <h2 class="text-danger">{% if status == 'RSE' %}Response Status Error{% elif status == 'TSE' %}Transaction Status Error{% endif %}</h2>
+                            <h3>عملیات پرداخت با خطا روبه رو شد</h3>
+                            <p>در صورتی که هزینه سفارش از حساب شما کسر نشده است , وضعبت اینترنت خود را بررسی کنید (درصورتی که از ابزار رفع فیلتر استفاده میکنید آن را قطع کنید) و عملیات را دوباره انجام بدید و یا درصورت تمایل میتوانید با ما تماس بگیرید .
+                            درصورتی که هزینه سفارش از حساب شما کسر شده است , برای ثبت قطعی سفارش با ما تماس بگیرید .
+                            </p>
+                        {% elif status == 'CE' %}
+                            <h2 class="text-danger">Connection Error</h2>
+                            <h3>اتصال شما قطع شد</h3>
+                            <p>وضعیت اینترنت خود را بررسی کنید (اگر که از ابزار رفع تحریم استفاده میکنید آن را قطع کنید) و دوباره برای ثبت سفارش اقدام کنید .
+                            درصورتی که هزینه سفارش از حساب شما کسر شده است برای قظعی شدن سفارش با ما تماس بگیرید .
+                            </p>
+                        {% elif status == 'TE' %}
+                            <h2 class="text-danger">Timeout Error</h2>
+                            <h3>زمان شما به پایان رسید</h3>
+                            <p>برای ثبت سفارش دوباره اقدام کنید و یا درصورت تمایل میتوانید با ما تماس بگیرید</p>
+                        {% elif status == 'SF' %}
+                            <h2 class="text-success">پرداخت موفق آمیز</h2>
+                            <h3>سفارش شما ثبت شد. از حمایت و اعتماد شما ممنونیم.</h3>
+                            <p>کد پیگیری : {{ RefID }}</p>
+                        {% endif %}
+                    {% elif stage == 'send_request' %}
+                        {% if status == 'CE' %}
+                            <h2 class="text-danger">Connection Error</h2>
+                            <h3>اتصال شما قطع شد</h3>
+                            <p>وضعیت اینترنت خود را بررسی کنید (اگر که از ابزار رفع تحریم استفاده میکنید آن را قطع کنید) و دوباره برای انتقال به درگاه پرداخت اقدام کنید .</p>
+                        {% elif status == 'TE' %}
+                            <h2 class="text-danger">Timeout Error</h2>
+                            <h3>زمان شما به پایان رسید</h3>
+                            <p>برای انتقال به درگاه پرداخت دوباره اقدام کنید و یا درصورت تمایل میتوانید با ما تماس بگیرید</p>
+                        {% elif status == 'SRSE' or status == 'SRRE' %}
+                            <h2 class="text-danger">{% if status == 'SRSE' %}Zarinpal Send Request Response Error{% else %}Zarinpal Response Error{% endif %}</h2>
+                            <h3>عملیات انتقال به درگاه پرداخت با خطا مواجه شد</h3>
+                            <p>وضعیت اینترنت خود را بررسی کنید (اگر که از ابزار رفع تحریم استفاده میکنید آن را قطع کنید) و دوباره برای انتقال به درگاه پرداخت اقدام کنید .
+                            درصورت برطرف نشدن مشکل با ما تماس بگیرید .
+                            </p>
+                        {% endif %}
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

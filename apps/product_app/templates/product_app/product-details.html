@@ -1,0 +1,565 @@
+{% extends 'templates/base.html' %}
+{% load social_share %}
+{% load jformat %}
+{% load humanize %}
+{% block main %}
+
+    <!-- BREADCRUMB AREA START -->
+    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__breadcrumb-inner text-center">
+                        <h1 class="ltn__page-title">جزئیات محصول</h1>
+                        <div class="ltn__breadcrumb-list">
+                            <ul>
+                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a>
+                                    <i class="fa-solid fa-chevron-left"
+                                       style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i>
+                                </li>
+                                <li><a href="{% url 'product:shop_page' %}"
+                                       style="text-decoration: underline">فروشگاه</a>
+                                    <i class="fa-solid fa-chevron-left"
+                                       style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i>
+                                </li>
+                                <li>{{ product.product_name }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB AREA END -->
+
+    <script>
+        function setDiscount(realPrice, specialPrice, elemId){
+            let newPriceElements = document.getElementsByClassName(`product${elemId}`);
+            let discountPrice = realPrice - specialPrice
+            let discountPercent = (discountPrice * 100) / realPrice
+            discountPercent = Math.floor(discountPercent)
+            for (let elem of newPriceElements){
+                elem.innerHTML = `${discountPercent}%`;
+            }
+        }
+        {% if product.special_price and product.status %}
+        function setTimer(date){
+            let countDownDate = new Date(date).getTime();
+            let x = setInterval(function() {
+                let now = new Date().getTime();
+                let distance = countDownDate - now;
+                let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                let countdown = document.getElementById('countdown');
+                countdown.innerHTML = `${days} روز - ${hours} ساعت - ${minutes} دقیقه - ${seconds}ثانیه `;
+
+                if (distance < 0) {
+                    clearInterval(x);
+                    let formData = new FormData();
+                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                    formData.append('productID', {{ product.id }});
+                    axios.post('{% url "main:countdown_end" %}', formData)
+                        .then(response => {
+                            if (response.data.status === 200){
+                                Swal.fire({
+                                    position: 'top-start',
+                                    icon: 'info',
+                                    title: `فروش ویژه محصول${response.data.product_name} به پایان رسید `,
+                                    showConfirmButton: false,
+                                    timer: 2500
+                                }).then(() => {
+                                    window.location.reload();
+                                })
+                            }
+                            else if (response.data.status === 400){
+                                console.log('product countdown came up with code 400')
+                            }
+                            else {
+                                console.log('product countdown came up with unknown error')
+                            }
+                        }).catch(err => console.log(err))
+                }
+            }, 1000);
+        }
+        {% endif %}
+    </script>
+
+    <!-- SHOP DETAILS AREA START -->
+    <div class="ltn__shop-details-area pb-20">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12">
+                    <div class="ltn__shop-details-inner">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="ltn__shop-details-img-gallery ltn__shop-details-img-gallery-2">
+                                    <div class="ltn__shop-details-small-img slick-arrow-2">
+                                        {% for image in product.images.all %}
+                                            <div class="single-small-img">
+                                                <img src="{{ image.img.url }}" alt="Product{{ product.id }}Image{{ image.id }}">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="ltn__shop-details-large-img">
+                                        {% for image in product.images.all %}
+                                            <div class="single-large-img">
+                                                <a href="{{ image.img.url }}" data-rel="lightcase:myCollection">
+                                                    <img src="{{ image.img.url }}" alt="Product{{ product.id }}Image{{ image.id }}" style="width: 480px">
+                                                </a>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="modal-product-info shop-details-info pl-0">
+                                    <h1 class="mb-1" {% if product.special_price %}style="display: inline" {% endif %}>
+                                        {{ product.product_name }}
+                                    </h1>
+                                    {% if product.subtitle %}
+                                        <h5 style="color: #515151" class="mb-1">{{ product.subtitle }}</h5>
+                                    {% endif %}
+                                    {% if product.selected_product %}
+                                        <div class="badge badge-danger" style="font-size: inherit">برگزیده</div>
+                                    {% endif %}
+                                    {% if product.special_price and product.status %}
+                                        <div class="badge badge-success product{{ product.id }}" style="font-size: inherit"></div>
+                                        <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
+                                    {% endif %}
+                                    <div class="product-price-ratting mb-20">
+                                        <ul>
+                                            <li>
+                                                <div class="product-price">
+                                                    {% if product.status %}
+                                                        {% if not product.special_price %}
+                                                            <span style="color: #e55472;">{{ product.price|intcomma:False }} تومان</span>
+                                                        {% else %}
+                                                            <h5 class="d-block" id="countdown" style="color: #c40000"></h5>
+                                                            <span style="color: #d50000;">{{ product.special_price|intcomma:False }} تومان</span>
+                                                            <del style="color: #000">{{ product.price|intcomma:False }} تومان</del>
+                                                            <script>setTimer('{{ product.remaining_time|date:"m/d/Y" }}')</script>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span style="color: #b00;">محصول موجود نمی باشد</span>
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="modal-product-brief">
+                                        <h5>{{ product.property|safe }}</h5>
+                                    </div>
+                                    <div class="ltn__product-details-menu-2 product-cart-wishlist-btn mb-10">
+                                        <ul>
+                                            {% if product.status %}
+                                                <li>
+                                                    <div class="cart-plus-minus">
+                                                        <div class="dec qtybutton">-</div>
+                                                        <input type="text" value="1" name="quantity"
+                                                               class="cart-plus-minus-box">
+                                                        <div class="inc qtybutton">+</div>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <button class="theme-btn-1 btn btn-effect-1 d-add-to-cart"
+                                                            title="Add to Cart">
+                                                        <span>افزودن به سبد خرید</span>
+                                                    </button>
+                                                </li>
+                                            {% endif %}
+                                            {% if product.tipA.all %}
+                                                <li class="d-inline-flex">
+                                                    <label for="reizanTip" class="mr-2">تیپ:</label>
+                                                    <select id="reizanTip" class="form-control" style="background-color: #e8e8e8">
+                                                            <option value="B" class="form-control" selected>تیپ B</option>
+                                                            <option value="A" class="form-control">تیپ A</option>
+                                                    </select>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    <div class="ltn__social-media mb-10">
+                                        <ul>
+                                            <li class="d-meta-title">اشتراک گذاری محصول:</li>
+                                            <li>
+                                                {% post_to_telegram product.get_absolute_url '' '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-telegram" viewBox="0 0 16 16" style="color:#009fff"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>' %}
+                                            </li>
+                                            <li>
+                                                {% post_to_whatsapp product.get_absolute_url '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16" style="color:darkgreen"><path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/></svg>' %}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="modal-product-meta ltn__product-details-menu-1 mb-10">
+                                        <ul>
+                                            <li><strong>شناسه محصول:</strong> <span>{{ product.id }}</span></li>
+                                            <li>
+                                                <strong>دسته بندی:</strong>
+                                                <span>
+                                                    {% for category in product.category.all %}
+                                                        <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">{{ category.title }}</a>
+                                                    {% endfor %}
+                                                </span>
+                                            </li>
+                                            <li>
+                                                <strong>تگ ها:</strong>
+                                                <span>
+                                                    {% for tag in product.tag.all %}
+                                                        <a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}">{{ tag.title }}</a>
+                                                    {% endfor %}
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SHOP DETAILS AREA END -->
+
+    <!-- SHOP DETAILS TAB AREA START -->
+    <div class="ltn__shop-details-tab-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__shop-details-tab-inner">
+                        <div class="ltn__shop-details-tab-menu"><div class="nav"></div></div>
+                        <div class="tab-content">
+                            <div class="ltn__shop-details-tab-content-inner">
+                                <p>{{ product.description|safe }}</p>
+                            </div>
+                        </div>
+                        <div class="ltn__shop-details-tab-menu"><div class="nav"></div></div>
+                        <div class="tab-content">
+                            <div class="ltn__shop-details-tab-content-inner">
+                                <div class="customer-reviews-head text-center">
+                                    <h6 class="title-2 m-0">نظرات مشتریان</h6>
+                                    <div class="product-ratting m-0">
+                                        <ul>
+                                            <li class="review-total">( {{ product.comments.count }} نظر )</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <hr class="mt-0">
+                                <div class="row">
+                                    <div class="col-lg-7">
+                                        <!-- comment-area -->
+                                        <div class="ltn__comment-area mb-30">
+                                            <div class="ltn__comment-inner">
+                                                <ul>
+                                                    {% for comment in product.comments.all %}
+                                                        <li>
+                                                            <div class="ltn__comment-item clearfix">
+                                                                <div class="ltn__commenter-comment">
+                                                                    <p>{{ comment.user.first_name }} {{ comment.user.last_name }}</p>
+                                                                    <p>{{ comment.text }}</p>
+                                                                    <span class="ltn__comment-reply-btn">{{ comment.created_at|jformat:'%Y/%m/%d' }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                        {% for reply in comment.replies.all %}
+                                                            <li style="margin-right: 5%; padding-top: 0">
+                                                                <div class="ltn__comment-item clearfix">
+                                                                    <div class="ltn__commenter-comment">
+                                                                        <p>{{ reply.responder_name_persistent }}</p>
+                                                                        <p>{{ reply.text }}</p>
+                                                                        <span class="ltn__comment-reply-btn">{{ reply.created_at|jformat:'%Y/%m/%d' }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <!-- comment-reply -->
+                                        <div class="ltn__comment-reply-area ltn__form-box mb-60">
+                                            <form action="#">
+                                                <h4 class="title-2">نظر خود را ثبت کنید</h4>
+                                                <div class="input-item input-item-textarea ltn__custom-icon">
+                                                    <textarea id="textarea" placeholder="نظر خود را وارد کنید..."></textarea>
+                                                </div>
+                                                {% if not request.user.is_authenticated %}
+                                                    <span class="badge badge-2 text-danger">* برای ثبت نظر ابتدا باید وارد
+                                                        <a href="{% url 'account:login' %}" class="text-dark" style="text-decoration: underline">حساب کاربری </a>
+                                                        خود شوید.
+                                                    </span>
+                                                {% endif %}
+                                                <div class="btn-wrapper">
+                                                    <button class="btn theme-btn-1 btn-effect-1 text-uppercase" type="submit" id="submitBtn">ثبت</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- SHOP DETAILS TAB AREA END -->
+
+    <!-- PRODUCT SLIDER AREA START -->
+    <div class="ltn__product-slider-area" style="background-color: #0e1953">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="text-center mt-10 mb-15">
+                        <h1 class="section-title section-title-border2 text-light">محصولات مرتبط</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row ltn__related-product-slider-one-active slick-arrow-1">
+                <!-- ltn__product-item -->
+                {% for product in similar_products %}
+                    <div class="col-12">
+                        <div class="ltn__product-item ltn__product-item-4 mb-15">
+                            <div class="product-img">
+                                {% for image in product.images.all|slice:':1' %}
+                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">
+                                        <img src="{{ image.img.url }}" alt="Product{{ product.id }}Image{{ image.id }}">
+                                    </a>
+                                {% endfor %}
+                                {% if product.special_price or product.selected_product %}
+                                    <div class="product-badge">
+                                        <ul>
+                                            {% if product.selected_product %}
+                                                <li class="m-0 badge-1">برگزیده</li>
+                                            {% endif %}
+                                            {% if product.special_price and product.status %}
+                                                <li class="m-0 badge-2 product{{ product.id }}"></li>
+                                                <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                                <div class="product-hover-action product-hover-action-2">
+                                    <ul>
+                                        <li>
+                                            <a href="{% url 'product:productDetail_page' product.id product.slug %}"
+                                               title="مشاهده">
+                                                <i class="icon-magnifier"></i>
+                                            </a>
+                                        </li>
+                                        <li class="add-to-cart">
+                                            {% if product.status %}
+                                                <a href="{% url 'cart:addToCart' product.id %}" title="Add to Cart">
+                                                    <span class="cart-text d-none d-xl-block">افزودن به سبد خرید</span>
+                                                    <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
+                                                </a>
+                                            {% else %}
+                                                <a>
+                                                    <span class="cart-text d-none d-xl-block" style="color: red">محصول موجود نمی باشد</span>
+                                                    <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
+                                                </a>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="product-info" style="background-color: #e9e9e9;height: 100px">
+                                <h2 class="product-title text-center">
+                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">{{ product.product_name }}</a>
+                                </h2>
+                                <div class="product-price text-center">
+                                    {% if product.status %}
+                                        {% if not product.special_price %}
+                                            <span>{{ product.price|intcomma:False }} تومان</span>
+                                        {% else %}
+                                            <span>{{ product.special_price|intcomma:False }} تومان</span>
+                                            <del>{{ product.price|intcomma:False }} تومان</del>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: #b00;">محصول موجود نمی باشد</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!-- PRODUCT SLIDER AREA END -->
+
+    <script>
+    // COMMENT SECTION START
+        let submitBtn = document.getElementById('submitBtn');
+        let textArea = document.getElementById('textarea');
+        submitBtn.addEventListener('click', event => {
+            event.preventDefault();
+            if (textArea.value) {
+                let formData = new FormData();
+                formData.append('text', textArea.value);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                function clearTextArea() {
+                    textArea.value = '';
+                }
+
+                axios.post('{% url "product:productDetail_page" product.id product.slug %}', formData)
+                    .then(response => {
+                        if (response.data.status === 401) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'خطای احراز هویت',
+                                text: 'برای ثبت نظر خود باید وارد حساب کاربریتان شوید!',
+                                footer: `<a href="{% url 'account:login' %}">حساب کاربری دارید ؟</a>`,
+                                confirmButtonColor: '#3085d6',
+                            });
+                            clearTextArea();
+                        } else if (response.data.status === 400) {
+                            Swal.fire({
+                                icon: 'error',
+                                text: 'فرم معتبر نمی باشد ! ',
+                                confirmButtonColor: '#3085d6',
+                            });
+                            clearTextArea();
+                        } else if (response.data.status === 200) {
+                            let commentsList = document.querySelector('.ltn__comment-inner ul');
+                            const date = response.data.created_date;
+
+                            Swal.fire({
+                                position: 'top-start',
+                                icon: 'success',
+                                title: 'نظر شما با موفقیت ثبت شد',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
+                            commentsList.insertAdjacentHTML('afterbegin', `
+                                <li>
+                                    <div class="ltn__comment-item clearfix">
+                                        <div class="ltn__commenter-comment">
+                                            <p>${response.data.name}</p>
+                                            <p>${textArea.value}</p>
+                                            <span class="ltn__comment-reply-btn">${date}</span>
+                                        </div>
+                                    </div>
+                                </li>`)
+
+                            clearTextArea();
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: err.code,
+                            text: 'خطایی رخ داده است! وضعیت اینترنت خود را بررسی کنید و دوباره امتحان کنید. در صورت برطرف نشدن مشکل با پشتیبانی تماس بگیرید.',
+                            confirmButtonColor: '#3085d6',
+                        })
+                        console.log(err)
+                    })
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    text: 'ابتدا نظر خود را وارد کنید !',
+                    confirmButtonColor: '#3085d6',
+                })
+            }
+        })
+    // COMMENT SECTION END
+
+    // ADD TO CART SECTION START
+        let addToCartBtn = document.querySelector('.ltn__product-details-menu-2 button');
+        let priceInfo = document.querySelector('.product-price span');
+        let reizanTips = document.getElementById('reizanTip');
+
+        function addToCart(){
+            let quantity = document.querySelector('.ltn__product-details-menu-2 input').value;
+            let formData = new FormData();
+            formData.append('quantity', quantity);
+            if (document.contains(reizanTips)){
+                formData.append('tip', reizanTips.value)
+            }
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            axios.post('{% url "cart:addToCart" product.id %}', formData)
+                .then(response => {
+                    if (response.data.status === 200) {
+                        Swal.fire({
+                            position: 'top-start',
+                            icon: 'success',
+                            title: 'با موفقیت به سبد خرید شما اضافه شد',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            window.location.assign('{% url "cart:detail_page" %}')
+                        })
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            text: 'محصول یافت نشد !',
+                            confirmButtonColor: '#3085d6',
+                        })
+                    }
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: err.code,
+                        text: 'خطایی رخ داده است! وضعیت اینترنت خود را بررسی کنید و دوباره امتحان کنید. در صورت برطرف نشدن مشکل با پشتیبانی تماس بگیرید.',
+                        confirmButtonColor: '#3085d6',
+                    })
+                    console.log(err)
+                })
+        }
+        if (document.contains(addToCartBtn)){
+            addToCartBtn.addEventListener('click', addToCart);
+        }
+    // ADD TO CART SECTION END
+
+    // REIZAN PRODUCT SECTION START - CHANGE PRODUCT TIP
+        {% if product.tipA.all %}
+            reizanTips.addEventListener('change', () => {
+                let tip = reizanTips.value;
+                let formData = new FormData();
+                formData.append('tip', tip);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                axios.post('{% url 'product:show_reizan_tip' product.slug %}', formData)
+                    .then(response => {
+                        if (response.data.status === 200){
+                            priceInfo.innerHTML = `${response.data.price} تومان`;
+                        }
+                        else if (response.data.status === 404) {
+                            addToCartBtn.classList.add('disabled');
+                            addToCartBtn.removeEventListener('click', addToCart);
+                            Swal.fire({
+                                icon: 'error',
+                                text: 'محصول یافت نشد !',
+                                confirmButtonColor: '#3085d6',
+                            })
+                        }
+                        else if (response.data.status === 400){
+                            Swal.fire({
+                                icon: 'error',
+                                text: 'خطایی رخ داده است !',
+                                confirmButtonColor: '#3085d6',
+                            })
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: err.code,
+                            text: 'خطایی رخ داده است! وضعیت اینترنت خود را بررسی کنید و دوباره امتحان کنید. در صورت برطرف نشدن مشکل با پشتیبانی تماس بگیرید.',
+                            confirmButtonColor: '#3085d6',
+                        })
+                        console.log(err)
+                    })
+            })
+        {% endif %}
+    // REIZAN PRODUCT SECTION END - CHANGE PRODUCT TIP
+    </script>
+
+{% endblock %}

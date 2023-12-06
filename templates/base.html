@@ -1,0 +1,73 @@
+{% load static %}
+{% load render_partial %}
+<!doctype html>
+<html lang="fa">
+
+{% include 'templates/includes/headerLinks.html' %}
+
+<body>
+<!-- Body main wrapper start -->
+<div class="body-wrapper">
+
+    {% include 'templates/includes/header.html' %}
+
+    {% include 'templates/includes/mobileMenu.html' %}
+
+    <div class="ltn__utilize-overlay"></div>
+
+    {% block main %}
+    {% endblock %}
+
+    <!-- BRAND LOGO AREA START -->
+    {% if slider_logo %}
+        {% include 'templates/includes/logoBrands.html' %}
+    {% endif %}
+    <!-- BRAND LOGO AREA END -->
+
+    <!-- FOOTER AREA START -->
+    {% include 'templates/includes/footer.html' %}
+    <!-- FOOTER AREA END -->
+
+    <!-- MODAL AREA START ( shipping method ) -->
+    {% render_partial 'main:shipping_method' %}
+    <!-- MODAL AREA END -->
+
+    <!-- MODAL AREA START ( site service ) -->
+    {% include 'templates/includes/site-service.html' %}
+    <!-- MODAL AREA END -->
+
+</div>
+<!-- Body main wrapper end -->
+
+<!-- preloader area start -->
+{% include 'templates/includes/preloader.html' %}
+<!-- preloader area end -->
+
+{% if fixedText and fixedText.status %}
+    <div id="fixedTextBox" style="border: 2px solid {{ fixedText.border_color }}; background-color: {{ fixedText.background_color }}">
+    {% if fixedText.url %}
+        <a href="{{ fixedText.url }}" style="text-decoration: underline">
+            <p class="m-0" style="color: {{ fixedText.text_color }}">{{ fixedText.text }}</p>
+        </a>
+    {% else %}
+        <p class="m-0" style="color: {{ fixedText.text_color }}">{{ fixedText.text }}</p>
+    {% endif %}
+        <button id="remove-button">X</button>
+    </div>
+    <script>
+        document.getElementById("remove-button").addEventListener("click", function () {
+            document.getElementById("fixedTextBox").remove();
+        });
+    </script>
+{% endif %}
+
+<!-- All JS Plugins -->
+<script src="{% static 'js/plugins.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/axios.min.js' %}"></script>
+<script src="{% static 'js/sweetalert.min.js' %}"></script>
+<!-- Main JS -->
+<script src="{% static 'js/main.js' %}"></script>
+
+</body>
+</html>

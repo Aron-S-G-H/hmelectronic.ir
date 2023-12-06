@@ -1,0 +1,45 @@
+{% extends 'templates/base.html' %}
+{% block main %}
+
+    <!-- BREADCRUMB AREA START -->
+    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__breadcrumb-inner text-center">
+                        <h1 class="ltn__page-title">404</h1>
+                        <div class="ltn__breadcrumb-list">
+                            <ul>
+                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a><i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i></li>
+                                <li>404</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB AREA END -->
+
+    <!-- 404 area start -->
+    <div class="ltn__404-area ltn__404-area-1 mb-120">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="error-404-inner text-center">
+                        <h1 class="error-404-title">404</h1>
+                        <h2>Page Not Found!</h2>
+                        <!-- <h3>Oops! Looks like something going rong</h3> -->
+                        <p>Oops! The page you are looking for does not exist. It might have been moved or deleted.</p>
+                        <div class="btn-wrapper">
+                            <a href="{% url 'main:Home_Page' %}" class="btn btn-transparent"><i class="fas fa-long-arrow-alt-left"></i>
+                                BACK TO خانه</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 404 area end -->
+
+{% endblock %}

@@ -1,0 +1,83 @@
+{% load render_partial %}
+
+<!-- Utilize Cart Menu Start -->
+{% include 'templates/includes/cartMenu.html' %}
+<!-- Utilize Cart Menu End -->
+
+<!-- Utilize Mobile Menu Start -->
+<div id="ltn__utilize-mobile-menu" class="ltn__utilize ltn__utilize-mobile-menu">
+    <div class="ltn__utilize-menu-inner ltn__scrollbar">
+        <div class="ltn__utilize-menu-head">
+            {% if logo %}
+                <div class="site-logo">
+                    <a href="{% url 'main:Home_Page' %}"><img src="{{ logo.img.url }}" alt="Logo" width="75px"></a>
+                </div>
+            {% endif %}
+            <button class="ltn__utilize-close">×</button>
+        </div>
+
+        <div class="ltn__utilize-menu-search-form">
+            <form id="MobileSearchForm" method="post" action="{% url 'product:shop_page' %}">
+                {% csrf_token %}
+                <input type="text" name="search" id="MobileSearchInput" placeholder="جست جو کنید..."/>
+                <button type="submit" id="MobileSearchSubmitBtn">
+                    <span><i class="icon-magnifier"></i></span>
+                </button>
+            </form>
+        </div>
+
+        <div class="ltn__utilize-menu">
+            <ul>
+                <li><a href="{% url 'main:Home_Page' %}" class="font-weight-bolder">صفحه اصلی</a></li>
+                {% for category in base_categories %}
+                    <li>
+                        <span class="font-weight-bolder">{{ category.title }}</span>
+                        {% render_partial 'product:mobileCategoryPartial' category.slug %}
+                    </li>
+                {% endfor %}
+                <li><a href="{% url 'blog:list' %}" class="font-weight-bolder">بلاگ</a></li>
+                <li><a href="{% url 'main:AboutUs_Page' %}" class="font-weight-bolder">درباره ما</a></li>
+                <li><a href="{% url 'contactUs:contact_page' %}" class="font-weight-bolder"> تماس با ما</a></li>
+            </ul>
+        </div>
+        <div class="ltn__utilize-buttons ltn__utilize-buttons-2">
+            <ul>
+                <li>
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'account:logout' %}" title="{{ request.user.first_name }} {{ request.user.last_name }}">
+                        <span class="utilize-btn-icon"><i class="icon-user"></i></span>
+                        خروج از حساب -
+                        <small>{{ request.user.first_name }} {{ request.user.last_name }}</small>
+                    </a>
+                    {% else %}
+                        <a href="{% url 'account:login' %}" title="ورود به حساب">
+                            <span class="utilize-btn-icon"><i class="icon-user"></i></span>ورود
+                        </a>
+                    {% endif %}
+                </li>
+                <li>
+                    <a href="{% url 'cart:detail_page' %}" title="Shoping Cart">
+                        <span class="utilize-btn-icon">
+                            <i class="icon-handbag"></i>
+                            <sup>{{ cart.cart_quantity }}</sup>
+                        </span>
+                        سبد خرید
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    let MobileSearchSubmitBtn = document.getElementById('MobileSearchSubmitBtn');
+    let MobileSearchInput = document.getElementById('MobileSearchInput');
+
+    MobileSearchSubmitBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (MobileSearchInput.value) {
+            document.getElementById('MobileSearchForm').submit()
+        }
+    })
+</script>
+<!-- Utilize Mobile Menu End -->

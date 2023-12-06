@@ -1,0 +1,52 @@
+<div class="col-lg-4">
+    <aside class="sidebar-area blog-sidebar ltn__right-sidebar">
+        {% if base_categories %}
+            {% for base_category in base_categories %}
+                <div class="widget ltn__menu-widget">
+                    <h4 class="ltn__widget-title">دسته بندی {{ base_category.title }}</h4>
+                    <ul>
+                        {% for category in base_category.main_categories.all %}
+                            {% if category.title == 'براساس برند' %}
+                                {% if not category.parent %}
+                                    {% for sub in category.subs.all %}
+                                        <li>
+                                            <a href="{% url 'product:categoryDetails_page' sub.id sub.slug %}">{{ sub.title }}</a>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                            {% elif category.base_category.title == 'یو پی اس و باتری' %}
+                                {% if not category.parent and not category.title == 'براساس کاربرد' %}
+                                    <li>
+                                        <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
+                                            {{ category.title }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% elif category.base_category.title == 'تجهیزات سرمایشی و گرمایشی' %}
+                                {% if not category.parent %}
+                                    <li>
+                                        <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
+                                            {{ category.title }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Products Tags Section -->
+        {% if product_tags %}
+            <div class="widget ltn__tagcloud-widget">
+                <h4 class="ltn__widget-title">تگ های محصولات</h4>
+                <ul>
+                    {% for tag in product_tags %}
+                        <li><a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}">{{ tag.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </aside>
+</div>

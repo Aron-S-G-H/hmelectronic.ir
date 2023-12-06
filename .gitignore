@@ -1,0 +1,9 @@
+venv
+db.sqlite3
+robots.txt
+media
+Electronic/settings.ini
+.idea
+assets/img
+assets/webfonts
+assets/fonts

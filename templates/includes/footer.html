@@ -1,0 +1,148 @@
+{% load static %}
+<footer class="ltn__footer-area ">
+    <div class="footer-top-area  section-bg-5">
+        <div class="container">
+            <h5 class="text-center text-light">مختصری از ما</h5>
+            <a href="{% url 'main:AboutUs_Page' %}" class="text-light">{{ aboutUs.description|safe|truncatewords:'60' }}</a>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                    <div class="footer-widget footer-menu-widget clearfix text-center">
+                        <img src="{% static 'img/HMLLL.png' %}" width="70%" alt="HM_Electronic logo">
+                    </div>
+                </div>
+
+                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                    <div class="footer-widget footer-menu-widget clearfix">
+                        <h2 class="footer-title">دسترسی سریع</h2>
+                        <div class="footer-menu">
+                            <ul>
+                                <li><a href="{% url 'main:Home_Page' %}">صفحه اصلی</a></li>
+                                {% for category in base_categories %}
+                                    <li><a href="{% url 'product:categoryDetails_page' category.id category.slug %}">{{ category.title }}</a></li>
+                                {% endfor %}
+                                <li><a href="{% url 'blog:list' %}">وبلاگ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                    <div class="footer-widget footer-menu-widget clearfix">
+                        <h2 class="footer-title">پشتیبانی</h2>
+                        <div class="footer-menu">
+                            <ul>
+                                <li><a href="{% url 'main:FrequentlyQuestions_Page' %}">سوالات متداول</a></li>
+                                <li>
+                                    <a href="#" title="روش های ارسال" data-toggle="modal" data-target="#quick_view_modal">روش های ارسال</a>
+                                </li>
+                                <li><a href="{% url 'contactUs:contact_page' %}">تماس با ما</a></li>
+                                <li><a href="{% url 'main:AboutUs_Page' %}">درباره ما</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% if communication_ways.medias.all %}
+                    <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                        <div class="footer-widget footer-menu-widget clearfix">
+                            <h2 class="footer-title">با ما همراه باشید</h2>
+                            <div class="footer-menu">
+                                <ul>
+                                    {% for media in communication_ways.medias.all %}
+                                        <li style="width: 40px">
+                                            <a href="{{ media.link }}">
+                                                <img src='{{ media.icon.url }}' alt="icon">
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="col-xl-4 col-md-6 col-sm-6 col-12">
+                    <div class="footer-widget footer-about-widget">
+                        {% if communication_ways %}
+                            <h2 class="footer-title">ارتباط با ما </h2>
+                            <div class="footer-address">
+                                <ul>
+                                    <li>
+                                        <div class="footer-address-icon">
+                                            <i class="icon-location-pin"></i>
+                                        </div>
+                                        <div class="footer-address-info">
+                                            <p>{{ communication_ways.address }}</p>
+                                        </div>
+                                    </li>
+                                    {% if communication_ways.company_n.all %}
+                                        {% for number in communication_ways.company_n.all %}
+                                            <li>
+                                                <div class="footer-address-icon">
+                                                    <i class="icon-phone"></i>
+                                                </div>
+                                                <div class="footer-address-info">
+                                                    <p>
+                                                        <a href="tel:{{ number.province_code }}{{ number.number }}">دفتر: {{ number.number }}-{{ number.province_code }}</a>
+                                                    </p>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if communication_ways.phone_n.all %}
+                                        {% for phone in communication_ways.phone_n.all %}
+                                            <li>
+                                                <div class="footer-address-icon">
+                                                    <i class="icon-phone"></i>
+                                                </div>
+                                                <div class="footer-address-info">
+                                                    <p><a href="tel:{{ phone.phone_number }}">{{ phone.title }}:
+                                                        {{ phone.phone_number }}</a></p>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-xl-2 col-md-6 col-sm-6 col-12">
+                    <div class="footer-widget footer-menu-widget clearfix text-center">
+                        <div class="footer-menu mt-lg-1">
+                            <a referrerpolicy="origin" target="_blank" href="https://trustseal.enamad.ir/?id=287206&Code=ltR3fZ2GbwZqoJhMnLmS">
+                                <img referrerpolicy="origin" src="{% static 'img/enamad.png' %}" width="70%" alt="E_Namad" id="ltR3fZ2GbwZqoJhMnLmS">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ltn__copyright-area ltn__copyright-2 section-bg-5">
+        <div class="container ltn__border-top-2">
+            <div class="row">
+                <div class="col-md-6 col-12">
+                    <div class="footer-copyright-left">
+                        <div class="ltn__copyright-design clearfix">
+                            <p>&copy; <span class="current-year"></span>تمامی حقوق برای وبسایت اچ ام الکترونیک محفوظ است
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-12 align-self-center">
+                    <div class="footer-copyright-right text-right">
+                        <div class="ltn__copyright-menu">
+                            <ul>
+                                <li>
+                                    ارائه شده توسط
+                                    <a href="#" class="text-warning text-decoration" data-toggle="modal" data-target="#site_service_modal">آرون صادق</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,122 @@
+{% extends 'templates/base.html' %}
+{% load jformat%}
+{% block main %}
+    <!-- BREADCRUMB AREA START -->
+    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__breadcrumb-inner text-center">
+                        <h1 class="ltn__page-title">درباره ما</h1>
+                        <div class="ltn__breadcrumb-list">
+                            <ul>
+                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a><i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i></li>
+                                <li>درباره ما</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BREADCRUMB AREA END -->
+
+    <!-- FEATURE AREA START ( Feature - 3) -->
+    {% if aboutUs.features.all %}
+    <div class="ltn__feature-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ltn__feature-item-box-wrap ltn__feature-item-box-wrap-2 ltn__border section-bg-6" style="box-shadow: 0px 0px 30px 6px #0E1953;border: 4px solid #ee9c00;">
+                        {% for feature in aboutUs.features.all %}
+                            <div class="ltn__feature-item ltn__feature-item-8">
+                                {% if feature.icon %}
+                                    <div class="ltn__feature-icon">
+                                        <img src="{{ feature.icon.url }}" alt="{{ feature.title }}">
+                                    </div>
+                                {% endif %}
+                                <div class="ltn__feature-info">
+                                    {% if feature.title %}
+                                    <h4 class="text-light">{{ feature.title }}</h4>
+                                    {% endif %}
+                                    {% if feature.description %}
+                                    <p style="color: #ee9c00">{{ feature.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- FEATURE AREA END -->
+
+    <!-- درباره ما AREA START -->
+    {% if aboutUs %}
+    <div class="ltn__about-us-area pt-90 pb-70">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 align-self-center">
+                    <div class="about-us-info-wrap text-center">
+                        {% if aboutUs.title %}
+                        <h2 class="mb-30 font-weight-6">{{ aboutUs.title }}</h2>
+                        {% endif %}
+                        {% if aboutUs.description %}
+                        {{ aboutUs.description|safe }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- درباره ما AREA END -->
+
+{% if blogs %}
+    <!-- blog AREA START (blog-3) -->
+    <div class="ltn__blog-area pb-10" style="background-color: #0e1953">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title-area text-center">
+                        <h1 class="section-title section-title-border text-light">برخی از مقالات ما</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="row  ltn__blog-slider-one-active slick-arrow-1">
+                <!-- blog Item -->
+                {% for blog in blogs %}
+                <div class="col-lg-12">
+                    <div class="ltn__blog-item">
+                        <div class="ltn__blog-img">
+                            <a href="{% url 'blog:detail' blog.slug %}">
+                                <img src="{{ blog.img.url }}" alt="{{ blog.title }}">
+                            </a>
+                        </div>
+                        <div class="ltn__blog-brief">
+                            <div class="ltn__blog-meta">
+                                <ul class="text-warning">
+                                    <li class="ltn__blog-author">
+                                        <span>{{ blog.author }}</span>
+                                    </li>
+                                    <li>
+                                        <span>{{ blog.created_at|jformat:"%d %B %Y"}}</span>
+                                    </li>
+                                    <li class="ltn__blog-comment">
+                                        <span><i class="icon-speech"></i> {{ blog.comments.count }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <h3 class="ltn__blog-title blog-title-line"><a href="{% url 'blog:detail' blog.slug %}">{{ blog.title }}</a></h3>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+    <!-- blog AREA END -->
+{% endblock %}

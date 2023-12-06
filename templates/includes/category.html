@@ -1,0 +1,17 @@
+<ul class="mega-menu">
+    {% for category in categories %}
+        {% if not category.parent %}
+            {% if category.subs.all %}
+                <li><a href="{% url 'product:categoryDetails_page' category.id category.slug %}">{{ category.title }}</a>
+                    <ul>
+                        {% for sub in category.subs.all %}
+                            <li><a href="{% url 'product:categoryDetails_page' sub.id sub.slug %}">{{ sub.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% else %}
+                <li><a href="{% url 'product:categoryDetails_page' category.id category.slug %}">{{ category.title }}</a></li>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</ul>
