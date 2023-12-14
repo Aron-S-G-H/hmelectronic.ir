@@ -28,7 +28,13 @@ class Shop(View):
         page_number = request.GET.get('page')
         paginator = Paginator(products, 12)
         products_list = paginator.get_page(page_number)
-        return render(request, 'product_app/shop.html', {'products_list': products_list, 'tags': tags})
+        context = {
+            'products_list': products_list,
+            'tags': tags,
+            'meta_description': 'لیست محصولات تخفیف خورده ما صرفه جویی در هزینه و کیفیت بالا',
+            'meta_url': 'shop/'
+        }
+        return render(request, 'product_app/shop.html', context)
 
     def post(self, request):
         query = request.POST.get('search')
@@ -110,11 +116,14 @@ class CategoryDetailView(View):
         page_number = request.GET.get('page')
         paginator = Paginator(products, 12)
         products_list = paginator.get_page(page_number)
-        return render(request, 'product_app/shop.html', {
+        context = {
             'products_list': products_list,
             'categories': categories,
-            'tags': tags
-        })
+            'tags': tags,
+            'meta_description': 'در این دسته بندی مجموعه متنوع ما از تجهیزات الکترونیکی با کیفیت بالا را مرور کنید',
+            'meta_url': f'shop/category-details/{pk}/{slug}'
+        }
+        return render(request, 'product_app/shop.html', context)
 
 
 def show_tip_reizan(request, slug):

@@ -6,7 +6,7 @@ from admin_notification.views import check_notification_view
 from apps.product_app.api import ProductApi
 from apps.product_app.sitemaps import ProductSiteMap
 from apps.blog_app.sitemaps import BlogSiteMap
-from apps.home_app.sitemaps import StaticSiteMap
+from apps.home_app.sitemaps import StaticSiteMap, FaviconSitemap
 from .views import robots
 from django.contrib.sitemaps.views import sitemap
 
@@ -14,6 +14,7 @@ sitemaps = {
     'products': ProductSiteMap,
     'blogs': BlogSiteMap,
     'static': StaticSiteMap,
+    "favicon": FaviconSitemap,
 }
 
 urlpatterns = [

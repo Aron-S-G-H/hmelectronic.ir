@@ -1,5 +1,15 @@
 {% extends 'templates/base.html' %}
 {% load humanize %}
+
+{% block head %}
+    {% if meta_description and meta_url %}
+        <meta name="description" content="{{ meta_description }}"/>
+        <meta name="canonical" content="https://hmelecteronic.ir/{{ meta_url }}" />
+    {% endif %}
+    <meta name="robots" content="index, follow" />
+    <title>لیست محصولات - فروشگاه اچ ام الکترونیک</title>
+{% endblock %}
+
 {% block main %}
 
     <!-- BREADCRUMB AREA START -->

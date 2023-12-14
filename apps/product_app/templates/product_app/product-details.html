@@ -2,6 +2,14 @@
 {% load social_share %}
 {% load jformat %}
 {% load humanize %}
+
+{% block head %}
+    <meta name="description" content="{{ product.meta_description }}"/>
+    <meta name="robots" content="index, follow" />
+    <meta name="canonical" content="https://hmelecteronic.ir/shop/product/{{ product.id }}/{{ product.slug }}" />
+    <title>{{ product.title }}-اچ ام الکترونیک</title>
+{% endblock %}
+
 {% block main %}
 
     <!-- BREADCRUMB AREA START -->

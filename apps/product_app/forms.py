@@ -9,7 +9,7 @@ class ProductAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ProductAdminForm, self).__init__(*args, **kwargs)
-        self.fields['user'].queryset = Category.objects.exclude(parent=None)
+        self.fields['category'].queryset = Category.objects.exclude(parent=None)
 
     def clean(self):
         cleaned_data = super().clean()
