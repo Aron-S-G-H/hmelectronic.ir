@@ -2,8 +2,10 @@
 {% load render_partial %}
 <!doctype html>
 <html lang="fa">
-
-{% include 'templates/includes/headerLinks.html' %}
+<head>
+    {% block head %}{% endblock %}
+    {% include 'templates/includes/headerLinks.html' %}
+</head>
 
 <body>
 <!-- Body main wrapper start -->
@@ -57,7 +59,12 @@
     <script>
         document.getElementById("remove-button").addEventListener("click", function () {
             document.getElementById("fixedTextBox").remove();
+            sessionStorage.setItem('fixedBoxDimissed', 'true');
         });
+        // Check if the div element has been dismissed when the page loads
+        if (sessionStorage.getItem('fixedBoxDimissed') === 'true') {
+            document.getElementById("fixedTextBox").remove();
+        }
     </script>
 {% endif %}
 

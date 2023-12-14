@@ -6,9 +6,10 @@ from django.urls import reverse
 from hitcount.models import HitCount
 from django.contrib.contenttypes.fields import GenericRelation
 from django_jalali.db.models import jDateTimeField
+from apps.product_app.mixins import MetaDescriptionMixin
 
 
-class Blog(models.Model):
+class Blog(MetaDescriptionMixin, models.Model):
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,

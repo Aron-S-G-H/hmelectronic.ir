@@ -6,6 +6,7 @@ from django.urls import reverse
 from hitcount.models import HitCount
 from django.contrib.contenttypes.fields import GenericRelation
 from django_jalali.db.models import jDateTimeField, jDateField
+from .mixins import MetaDescriptionMixin
 
 
 class BaseCategory(models.Model):
@@ -68,7 +69,7 @@ class Category(models.Model):
         verbose_name_plural = 'دسته بندی ها'
 
 
-class Product(models.Model):
+class Product(MetaDescriptionMixin, models.Model):
     category = models.ManyToManyField(
         Category,
         related_name='products',
