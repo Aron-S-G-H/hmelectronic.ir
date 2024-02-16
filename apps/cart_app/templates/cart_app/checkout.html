@@ -40,39 +40,27 @@
                     <div class="ltn__checkout-inner">
                         <div class="ltn__checkout-single-content mt-50">
                             <h4 class="title-2">جزئیات صورتحساب</h4>
+                            <p class="text-center text-danger border border-danger d-none" id="error-message"></p>
                             <div class="ltn__checkout-single-content-info">
-                                <form action="{% url 'cart:checkOut_page' %}" method="post">
-                                    {% csrf_token %}
+                                <form>
                                     <h6>اطلاعات شخصی</h6>
                                     <div class="row">
                                         <div class="col-md-6">
-                                            {% for error in form.first_name.errors %}
-                                                <h6 class="text-danger">{{ error }}</h6>
-                                            {% endfor %}
                                             <div class="input-item input-item-name ltn__custom-icon">
                                                 {{ form.first_name|attr:"required" }}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            {% for error in form.last_name.errors %}
-                                                <h6 class="text-danger">{{ error }}</h6>
-                                            {% endfor %}
                                             <div class="input-item input-item-name ltn__custom-icon">
                                                 {{ form.last_name|attr:"required" }}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            {% for error in form.email.errors %}
-                                                <h6 class="text-danger">{{ error }}</h6>
-                                            {% endfor %}
                                             <div class="input-item input-item-email ltn__custom-icon">
                                                 {{ form.email|attr:"required" }}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            {% for error in form.phone.errors %}
-                                                <h6 class="text-danger">{{ error }}</h6>
-                                            {% endfor %}
                                             <div class="input-item input-item-phone ltn__custom-icon">
                                                 {{ form.phone|attr:"required" }}
                                             </div>
@@ -80,61 +68,31 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-4 col-md-6">
-                                            {% if form.state.errors %}
-                                                {% for error in form.state.errors %}
-                                                    <h6 class="text-danger">{{ error }}</h6>
-                                                {% endfor %}
-                                            {% else %}
-                                                <h6>استان</h6>
-                                            {% endif %}
+                                            <h6>استان</h6>
                                             <div class="input-item">
                                                 {{ form.state|attr:'required' }}
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-6">
-                                            {% if form.city.errors %}
-                                                {% for error in form.city.errors %}
-                                                    <h6 class="text-danger">{{ error }}</h6>
-                                                {% endfor %}
-                                            {% else %}
-                                                <h6>شهر</h6>
-                                            {% endif %}
+                                            <h6>شهر</h6>
                                             <div class="input-item">
                                                 {{ form.city|attr:"required" }}
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-6">
-                                            {% if form.postal_code.errors %}
-                                                {% for error in form.postal_code.errors %}
-                                                    <h6 class="text-danger">{{ error }}</h6>
-                                                {% endfor %}
-                                            {% else %}
-                                                <h6>کد پستی</h6>
-                                            {% endif %}
+                                            <h6>کد پستی</h6>
                                             <div class="input-item">
                                                 {{ form.postal_code|attr:"required" }}
                                             </div>
                                         </div>
                                         <div class="col-lg-4 col-md-6">
-                                            {% if form.national_code.errors %}
-                                                {% for error in form.national_code.errors %}
-                                                    <h6 class="text-danger">{{ error }}</h6>
-                                                {% endfor %}
-                                            {% else %}
-                                                <h6>کد ملی</h6>
-                                            {% endif %}
+                                            <h6>کد ملی</h6>
                                             <div class="input-item">
                                                 {{ form.national_code|attr:"required" }}
                                             </div>
                                         </div>
                                         <div class="col-lg-12 col-md-12">
-                                            {% if form.address.errors %}
-                                                {% for error in form.address.errors %}
-                                                    <h6 class="text-danger">{{ error }}</h6>
-                                                {% endfor %}
-                                            {% else %}
-                                                <h6>آدرس</h6>
-                                            {% endif %}
+                                            <h6>آدرس</h6>
                                             <div class="input-item input-item-textarea ltn__custom-icon">
                                                 {{ form.address|attr:"required" }}
                                             </div>
@@ -157,7 +115,7 @@
                             </p>
                             <p class="text-danger">* هزینه ارسال برعهده خریدار می باشد .</p>
                         </div>
-                        <button class="btn theme-btn-1 btn-effect-1 text-uppercase" id="submitBtn" type="submit">پرداخت
+                        <button class="btn theme-btn-1 btn-effect-1 text-uppercase" id="submit-btn" type="button">پرداخت
                             و ثبت سفارش
                         </button>
                     </div>
@@ -189,13 +147,87 @@
             </div>
         </div>
     </div>
-    <!-- WISHLIST AREA START -->
+    <form method="post" id="payment-form" action="https://ikc.shaparak.ir/iuiv3/IPG/Index/" enctype="multipart/form-data" class="d-none">
+        <input type="hidden" name="tokenIdentity" value="">
+    </form>
     <script>
+        let form = document.querySelector('.ltn__checkout-single-content-info form');
+        let submitBtn = document.getElementById('submit-btn');
+        let firstNameInput = form.querySelector('#first_name');
+        let lastNameInput = form.querySelector('#last_name');
+        let emailInput = form.querySelector('#email');
+        let phoneInput = form.querySelector('#phone');
+        let stateInput = form.querySelector('#state');
+        let cityInput = form.querySelector('#city');
+        let postalCodeInput = form.querySelector('#postal_code');
+        let nationalCodeInput = form.querySelector('#national_code');
+        let addressInput = form.querySelector('#address');
+        let noteInput = form.querySelector('#note');
 
-        const form = document.querySelector('.ltn__checkout-single-content-info form');
-        let submitBtn = document.getElementById('submitBtn');
+        let importantInputs = []
+        importantInputs.push(firstNameInput, lastNameInput, phoneInput, stateInput, cityInput, postalCodeInput, nationalCodeInput, addressInput);
+
+        function checkInputsValue(){
+            for (let input of importantInputs) {
+                if (!input.value) {
+                    input.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
+                    input.focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
         submitBtn.addEventListener('click', () => {
-            form.submit();
+            let inputsHasValue = checkInputsValue();
+            let preLoder = $("#preloader");
+            if (inputsHasValue) {
+                $.ajax({
+                url: '{% url 'cart:checkOut_page' %}',
+                type: 'POST',
+                data: {
+                    'first_name': firstNameInput.value,
+                    'last_name': lastNameInput.value,
+                    'email': emailInput.value,
+                    'phone': phoneInput.value,
+                    'state': stateInput.value,
+                    'city': cityInput.value,
+                    'postal_code': postalCodeInput.value,
+                    'national_code': nationalCodeInput.value,
+                    'address': addressInput.value,
+                    'note': noteInput.value,
+                },
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                    preLoder.show()
+                },
+                complete: function () {
+                    preLoder.hide()
+                },
+                success: function(response) {
+                    if (response.status === 200){
+                        let paymentForm = document.getElementById('payment-form');
+                        let tokenIdentityInput = paymentForm.querySelector('input');
+                        tokenIdentityInput.value = response.tokenIdentity;
+                        paymentForm.submit();
+                    } else if (response.status === 400) {
+                        let errorMessageElem = document.getElementById('error-message');
+                        errorMessageElem.textContent = `${response.errorField} : ${response.errorMessage}`;
+                        errorMessageElem.classList.remove('d-none');
+                        errorMessageElem.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
+                    }
+                },
+                error: function (err){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'خطایی رخ داده است! وضعیت اینترنت خود را بررسی کنید و دوباره امتحان کنید. در صورت برطرف نشدن مشکل با پشتیبانی تماس بگیرید.',
+                        confirmButtonColor: '#3085d6',
+                    })
+                    console.log(err)
+                }
+            })
+            }
         })
     </script>
 {% endblock %}

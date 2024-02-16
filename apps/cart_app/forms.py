@@ -10,42 +10,52 @@ class CheckoutForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={
                 'placeholder': 'نام',
                 'name': 'ltn__name',
+                'id': 'first_name',
             }),
             'last_name': forms.TextInput(attrs={
                 'placeholder': 'نام خانوادگی',
                 'name': 'ltn__lastname',
+                'id': 'last_name',
             }),
             'email': forms.EmailInput(attrs={
-                'placeholder': 'آدرس ایمیل',
+                'placeholder': 'آدرس ایمیل (اختیاری)',
                 'name': 'ltn__email',
+                'id': 'email',
             }),
             'phone': forms.TextInput(attrs={
                 'placeholder': 'شماره تلفن همراه خود را وارد کنید',
                 'name': 'ltn__phone',
+                'id': 'phone',
             }),
             'state': forms.TextInput(attrs={
                 'placeholder': 'نام استان خود را بنویسید',
                 'name': 'ltn__state',
+                'id': 'state',
             }),
             'city': forms.TextInput(attrs={
                 'placeholder': 'نام شهر خود را بنویسید',
                 'name': 'ltn__city',
+                'id': 'city',
             }),
             'postal_code': forms.TextInput(attrs={
                 'placeholder': 'کد پستی خود را وارد کنید',
                 'name': 'ltn__postal_code',
+                'id': 'postal_code',
             }),
             'national_code': forms.TextInput(attrs={
                 'placeholder': 'کد ملی خود را وارد کنید',
                 'name': 'ltn__national_code',
+                'id': 'national_code',
             }),
             'address': forms.Textarea(attrs={
                 'placeholder': 'آدرس خود را وارد کنید...',
                 'name': 'ltn__address',
+                'id': 'address',
             }),
             'note': forms.Textarea(attrs={
                 'placeholder': 'یادداشت کنید...',
                 'name': 'ltn__message',
+                'id': 'note',
             }),
         }
 

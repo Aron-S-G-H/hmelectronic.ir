@@ -1349,8 +1349,6 @@
               $(".ltn__header-sticky").addClass("sticky-active");
           }
       });
-
-
       $(window).on('load',function(){
           /*-----------------
               preloader
@@ -1359,11 +1357,6 @@
               var preLoder = $("#preloader");
               preLoder.fadeOut(1000);
 
-          };
-
-
+          }
       });
-
-
-
   })(jQuery);

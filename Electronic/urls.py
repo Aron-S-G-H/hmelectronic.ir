@@ -27,7 +27,7 @@ urlpatterns = [
     path('blog/', include('apps.blog_app.urls')),
     path('account/', include('apps.account_app.urls')),
     path('cart/', include('apps.cart_app.urls')),
-    path('zarinpal/', include('apps.zarinpal_app.urls')),
+    path('payment-gateway/', include('apps.zarinpal_app.urls')),
     path('hitcount/', include(('hitcount.urls', 'hitcount'), namespace='hitcount')),
     path('check/notification', check_notification_view, name="check_notifications"),
     path('robots.txt', robots, name="robots"),
