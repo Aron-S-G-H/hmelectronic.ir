@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from apps.product_app.models import Product
+from apps.zarinpal_app.views import get_token
 from .cart_module import Cart
 from .forms import CheckoutForm
 from .models import UserOrder, ProductOrder
@@ -107,10 +108,18 @@ class CheckOutView(View):
                     quantity=item['quantity'],
                     item_total=item['total'],
                 )
-            cart.remove_cart()
             request.session['user_order'] = new_order.id
-            return redirect(reverse('zarinpal:request'))
-        return render(request, 'cart_app/checkout.html', {'form': form})
+            amount = f'{new_order.total_price}0'
+            token = get_token(int(amount), new_order.id)
+            if token:
+                cart.remove_cart()
+                return JsonResponse({'status': 200, 'tokenIdentity': token})
+            else:
+                return JsonResponse({'status': 400, 'errorMessage': 'خطا در دریافت توکن', 'errorField': 'Token'})
+        errors = {field: error for field, errors in form.errors.items() for error in errors}
+        field = list(errors.keys())[0]
+        error_message = list(errors.values())[0]
+        return JsonResponse({'status': 400, 'errorMessage': error_message, 'errorField': field})
 
 
 # Function to output the invoice for each User Order

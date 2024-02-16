@@ -141,6 +141,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 NOTIFICATION_MODEL = 'cart_app.UserOrder'
 
 # Zarinpal SETTING--------------------------------------------
+RSI_PUBLIC_KEY = os.path.join(BASE_DIR, '0480752990.txt')
 MERCHANT = config('ZARINPAL_MERCHANT')
 SANDBOX = config('ZARINPAL_SANDBOX', cast=bool, default=False)
 

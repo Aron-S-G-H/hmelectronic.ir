@@ -1,151 +1,164 @@
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from apps.cart_app.models import UserOrder
 from django.shortcuts import get_object_or_404
 from apps.cart_app.sms_module import send_verify_order_sms
 import requests
-import json
 from celery.result import AsyncResult
+from django.views.decorators.csrf import csrf_exempt
 import logging
+import datetime
+import os
+import pytz
+import rsa
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
+from Crypto.Util.Padding import pad
 
-ZP_API_REQUEST = "https://www.zarinpal.com/pg/rest/WebGate/PaymentRequest.json"
-ZP_API_VERIFY = "https://www.zarinpal.com/pg/rest/WebGate/PaymentVerification.json"
-ZP_API_STARTPAY = "https://www.zarinpal.com/pg/StartPay/"
 
-description = "توضیحات مربوط به تراکنش "  # Required
-CallbackURL = 'http://127.0.0.1:8000/zarinpal/verify/'
+requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+try:
+    requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+except AttributeError:
+    # no pyopenssl support used / needed / available
+    pass
 
 
-def send_request(request):
-    user_order_id = request.session.get('user_order')
-    user_order = get_object_or_404(UserOrder, id=user_order_id)
-    data = {
-        "MerchantID": settings.MERCHANT,
-        "Amount": user_order.total_price + 0,
-        "Description": description,
-        "Phone": user_order.phone,
-        "CallbackURL": CallbackURL,
+IRAN_KISH = {
+    'get_token_url': 'https://ikc.shaparak.ir/api/v3/tokenization/make',
+    'post_and_redirect_url': 'https://ikc.shaparak.ir/iuiv3/IPG/Index/',
+    'confirmation_url': 'https://ikc.shaparak.ir/api/v3/confirmation/purchase',
+    'call_back_url': 'http://127.0.0.1:8000/zarinpal/verify/',
+    'terminal_id': '08174147',
+    'acceptor_id': '992180008174147',
+    'pass_phrase': 'FA27C2FB8E168D1D',
+    'sha1_key': 'PUT YOUR SHA1_KEY  HERE',
+    'rsa_public_key_file': settings.RSI_PUBLIC_KEY,
+    'post_and_redirect_token_key': 'tokenIdentity'
+}
+
+
+# load the rsa public key
+with open(IRAN_KISH['rsa_public_key_file'], mode='rb') as private_file:
+    rsa_public_key_data = private_file.read()
+rsa_public_key = rsa.PublicKey.load_pkcs1_openssl_pem(rsa_public_key_data)
+
+
+def get_token(amount: int, order_id: int):
+    aes_key, aes_iv = os.urandom(16), os.urandom(16)
+    aes = AES.new(aes_key, AES.MODE_CBC, aes_iv)
+    byte_array_data = bytearray(48)
+    byte_array_data[0:16], byte_array_data[16:48] = aes_key, \
+                                                    bytearray(
+                                                        SHA256.new(
+                                                            aes.encrypt(
+                                                                pad(
+                                                                    bytes(
+                                                                        bytearray.fromhex(
+                                                                            IRAN_KISH['terminal_id'] +
+                                                                            IRAN_KISH['pass_phrase'] +
+                                                                            str(amount).zfill(12) +
+                                                                            '00'
+                                                                        )
+                                                                    ),
+                                                                    16
+                                                                )
+                                                            )
+                                                        ).digest()
+                                                    )
+    authentication_envelope = {
+        'iv': aes_iv.hex(),
+        'data': rsa.encrypt(byte_array_data, rsa_public_key).hex()
     }
-    data = json.dumps(data)
+
     request_headers = {
-        'accept': 'application/json',
-        'content-type': 'application/json',
-        'content-length': str(len(data))
+        'transactionType': 'Purchase',
+        'terminalId': IRAN_KISH['terminal_id'],
+        'acceptorId': IRAN_KISH['acceptor_id'],
+        'amount': amount,
+        'revertUri': IRAN_KISH['call_back_url'],
+        'requestId': str(order_id),
+        'requestTimestamp': int(datetime.datetime.timestamp(datetime.datetime.now(tz=pytz.UTC)))
     }
-    try:
-        response = requests.post(url=ZP_API_REQUEST, data=data, headers=request_headers, timeout=20)
-        if response.status_code == 200:
-            response_json = response.json()
-            authority = response_json['Authority']
-            if response_json['Status'] == 100:
-                logging.info(f'Successfully Redirected to Zarinpal, OrderID:{user_order_id}')
-                return redirect(ZP_API_STARTPAY + authority)
-            elif response_json['Status'] == -1:
-                logging.warning(f'Zarinpal Send Request Response Error, OrderID:{user_order_id}')
-                context = {
-                    'stage': 'send_request',
-                    'status': 'SRRE'  # Send Request Response Error
-                }
-                return render(request, 'zarinpal_app/response.html', context)
-        else:
-            logging.warning(f'Zarinpal Send Request Response Status Error, OrderID:{user_order_id}')
-            context = {
-                'stage': 'send_request',
-                'status': 'SRSE'  # Send Request Status Error
-            }
-            return render(request, 'zarinpal_app/response.html', context)
-    except requests.exceptions.Timeout:
-        logging.warning(f'Zarinpal Send Request Timeout Error, OrderID:{user_order_id}')
-        context = {
-            'stage': 'send_request',
-            'status': 'TE'  # Timeout Error
-        }
-        return render(request, 'zarinpal_app/response.html', context)
-    except requests.exceptions.ConnectionError:
-        logging.warning(f'Zarinpal Send Request Connection Error, OrderID:{user_order_id}')
-        context = {
-            'stage': 'send_request',
-            'status': 'CE'  # Connection Error
-        }
-        return render(request, 'zarinpal_app/response.html', context)
+
+    payload = {
+        'authenticationEnvelope': authentication_envelope,
+        'request': request_headers
+    }
+
+    r = requests.post(IRAN_KISH['get_token_url'], json=payload, verify=False)
+    if r.ok:
+        result = r.json()
+        if result['responseCode'] == '00':
+            logging.info(f'SUCCESSFULLY GOT THE TOKEN , ORDER-ID:{order_id}')
+            return result['result']['token']
+    logging.warning(f'GET TOKEN ERROR, RESULT: {r.json()}, ORDER-ID: {order_id}')
+    return False
 
 
+@csrf_exempt
 def verify(request):
-    authority = request.GET.get('Authority')
-    status = request.GET.get('Status')
-    user_order_id = request.session.get('user_order')
-    user_order = get_object_or_404(UserOrder, id=user_order_id)
-    if status == 'OK' and authority:
-        data = {
-            "MerchantID": settings.MERCHANT,
-            "Amount": user_order.total_price + 0,
-            "Authority": authority,
+    response_code = request.POST.get('responseCode')
+    reference_id = request.POST.get('systemTraceAuditNumber')
+    if response_code == '00':
+        user_order_id = request.session.get('user_order')
+        user_order = get_object_or_404(UserOrder, id=user_order_id)
+        payload = {
+            'terminalId': IRAN_KISH['terminal_id'],
+            'retrievalReferenceNumber': request.POST.get('retrievalReferenceNumber'),
+            'systemTraceAuditNumber': reference_id,
+            'merchantId': request.POST.get('merchantID'),
+            'acceptorId': request.POST.get('acceptorId'),
+            'tokenIdentity': request.POST.get('token'),
         }
-        data = json.dumps(data)
-        headers = {'content-type': 'application/json', 'content-length': str(len(data))}
-        response = requests.post(url=ZP_API_VERIFY, data=data, headers=headers, timeout=20)
-        if response.status_code == 200:
-            response_json = response.json()
-            try:
-                reference_id = response_json['RefID']
-                if response_json['Status'] == 100:
-                    user_order.is_paid = True
-                    user_order.reference_id = reference_id
-                    send_verify_sms = send_verify_order_sms.apply_async(
-                        (user_order.phone, reference_id),
-                        retry=False,
-                        ignore_result=False,
-                        expires=20
-                    )
-                    sms_result = AsyncResult(send_verify_sms.task_id)
-                    try:
-                        get_sms_result = sms_result.get(timeout=30)
-                        logging.warning(get_sms_result['message'])
-                        if get_sms_result['status']:
-                            user_order.is_sms_sent = True
-                        else:
-                            user_order.is_sms_sent = False
-                    except TimeoutError as e:
-                        logging.warning("Send OTP SMS Task has not completed within the specified timeout")
-                        sms_result.forget()
+        r = requests.post(IRAN_KISH['confirmation_url'], json=payload, verify=False)
+        if r.ok:
+            result = r.json()
+            if result['status']:
+                user_order.is_paid = True
+                user_order.reference_id = reference_id
+                send_verify_sms = send_verify_order_sms.apply_async(
+                    (user_order.phone, reference_id),
+                    retry=False,
+                    ignore_result=False,
+                    expires=20
+                )
+                sms_result = AsyncResult(send_verify_sms.task_id)
+                try:
+                    get_sms_result = sms_result.get(timeout=30)
+                    logging.warning(get_sms_result['message'])
+                    if get_sms_result['status']:
+                        user_order.is_sms_sent = True
+                    else:
                         user_order.is_sms_sent = False
-                    user_order.save()
-                    context = {
-                        'stage': 'verify',
-                        'status': 'SF',  # Successful
-                        'RefID': reference_id
-                    }
-                    return render(request, 'zarinpal_app/response.html', context)
-                else:
-                    logging.warning(f'Verify Order Transaction Error, Status:{response_json["Status"]}, OrderID:{user_order_id}')
-                    context = {
-                        'stage': 'verify',
-                        'status': 'TSE'  # Transaction Status Error
-                    }
-                    return render(request, 'zarinpal_app/response.html', context)
-            except requests.exceptions.Timeout:
-                logging.warning(f'Verify Order Response TimeOut Error, OrderID:{user_order_id}')
+                except TimeoutError as e:
+                    logging.warning("Send Confirm SMS Task has not completed within the specified timeout")
+                    sms_result.forget()
+                    user_order.is_sms_sent = False
+                user_order.save()
                 context = {
                     'stage': 'verify',
-                    'status': 'TE'  # Timeout Error
+                    'status': 'SF',  # Successful
+                    'RefID': reference_id
                 }
                 return render(request, 'zarinpal_app/response.html', context)
-            except requests.exceptions.ConnectionError:
-                logging.warning(f'Verify Order Response Connection Error, OrderID:{user_order_id}')
+            else:
+                logging.warning(f'Verify Order Confirmation Error, STATUS:{r.json()}, ORDER-ID:{user_order_id}')
                 context = {
                     'stage': 'verify',
-                    'status': 'CE'  # Connection Error
+                    'status': 'VOCE'  # Verify Order Confirmation Error
                 }
                 return render(request, 'zarinpal_app/response.html', context)
         else:
-            logging.warning(f'Verify Order Response Error, Response Status:{response.status_code}, OrderID:{user_order_id}')
+            logging.warning(f'Verify Order Confirmation Error, Request-Result:{r.json()}, ORDER-ID:{user_order_id}')
             context = {
                 'stage': 'verify',
-                'status': 'RSE',  # Response Status Error
+                'status': 'VOCE'  # Verify Order Confirmation Error
             }
             return render(request, 'zarinpal_app/response.html', context)
     else:
-        logging.warning(f'Verify Order Transaction canceled, Status:{status}, OrderID:{user_order_id}')
+        logging.warning(f'Verify Order Transaction Canceled, RESPONSE-CODE:{response_code}')
         context = {
             'stage': 'verify',
             'status': 'CT'  # Canceled Transaction
