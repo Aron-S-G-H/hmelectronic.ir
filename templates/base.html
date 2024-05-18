@@ -1,80 +1,160 @@
-{% load static %}
-{% load render_partial %}
 <!doctype html>
-<html lang="fa">
+<html lang="FA-IR" dir="rtl">
 <head>
     {% block head %}{% endblock %}
     {% include 'templates/includes/headerLinks.html' %}
 </head>
 
 <body>
-<!-- Body main wrapper start -->
-<div class="body-wrapper">
+    <header>
+        <div class="container-fluid">
+            {% include 'templates/includes/header.html' %}
+        </div>
+    </header>
 
-    {% include 'templates/includes/header.html' %}
-
-    {% include 'templates/includes/mobileMenu.html' %}
-
-    <div class="ltn__utilize-overlay"></div>
+    <!-- start mega menu -->
+    <div class="mega-menu d-lg-block d-none">
+        <div class="container-fluid">
+            {% include 'includes/menu.html' %}
+        </div>
+    </div>
+    <!-- end mega menu -->
 
     {% block main %}
     {% endblock %}
 
-    <!-- BRAND LOGO AREA START -->
-    {% if slider_logo %}
-        {% include 'templates/includes/logoBrands.html' %}
-    {% endif %}
-    <!-- BRAND LOGO AREA END -->
+    <!-- start footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            {% include 'includes/footer.html' %}
+        </div>
+    </footer>
+    <!-- end footer -->
 
-    <!-- FOOTER AREA START -->
-    {% include 'templates/includes/footer.html' %}
-    <!-- FOOTER AREA END -->
-
-    <!-- MODAL AREA START ( shipping method ) -->
-    {% render_partial 'main:shipping_method' %}
-    <!-- MODAL AREA END -->
-
-    <!-- MODAL AREA START ( site service ) -->
-    {% include 'templates/includes/site-service.html' %}
-    <!-- MODAL AREA END -->
-
-</div>
-<!-- Body main wrapper end -->
-
-<!-- preloader area start -->
-{% include 'templates/includes/preloader.html' %}
-<!-- preloader area end -->
-
-{% if fixedText and fixedText.status %}
-    <div id="fixedTextBox" style="border: 2px solid {{ fixedText.border_color }}; background-color: {{ fixedText.background_color }}">
-    {% if fixedText.url %}
-        <a href="{{ fixedText.url }}" style="text-decoration: underline">
-            <p class="m-0" style="color: {{ fixedText.text_color }}">{{ fixedText.text }}</p>
-        </a>
-    {% else %}
-        <p class="m-0" style="color: {{ fixedText.text_color }}">{{ fixedText.text }}</p>
-    {% endif %}
-        <button id="remove-button">X</button>
+    <!-- mobile menu -->
+    <div class="mobile-footer d-lg-none d-flex">
+        <div class="parent">
+            <div class="item" onclick="topFunction()">
+                <i class="bi bi-chevron-up font-20"></i>
+            </div>
+            <div class="item">
+                <a href="{% url 'main:Home_page' %}" title="صفحه اصلی">
+                    <i class="bi bi-house font-20"></i>
+                </a>
+            </div>
+            <div class="item item-float">
+                <a href="#offcanvasCart" data-bs-toggle="offcanvas" role="button" aria-label="Cart" title="سبد خرید" aria-controls="offcanvasCart">
+                    <i class="bi bi-bag font-20"></i>
+                </a>
+            </div>
+            <div class="item">
+                <a href="{% url 'cart:detail_page' %}" title="سبد خرید">
+                    <i class="bi bi-bag-check"></i>
+                </a>
+            </div>
+            <div class="item">
+                <a href="{% url 'blog:list' %}" title="مقالات">
+                    <i class="bi bi-file-text"></i>
+                </a>
+            </div>
+        </div>
     </div>
+    <!-- end mobile menu -->
+
+    <!-- cart canvas -->
+    <div class="offcanvas cart-canvas offcanvas-end" tabindex="-1" id="offcanvasCart" aria-labelledby="offcanvasCartLabel">
+        {% include 'includes/cartMenu.html' %}
+    </div>
+    <!-- end cart canvas -->
+
+
+    <div class="float-btn">
+        <div class="container-fluid">
+            <!-- go top top -->
+            <div class="progress-wrap d-lg-block d-none">
+                <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+                    <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+                </svg>
+            </div>
+            <!-- end go top top -->
+
+            <!-- contact us floating -->
+            <div id="btncollapzion" class=" btn_collapzion"></div>
+            <div class="" id="contactOverlay"></div>
+            <!-- end contact us floating -->
+        </div>
+    </div>
+
+    {% include 'includes/footerlinks.html' %}
+
     <script>
-        document.getElementById("remove-button").addEventListener("click", function () {
-            document.getElementById("fixedTextBox").remove();
-            sessionStorage.setItem('fixedBoxDimissed', 'true');
+        //// config floating contact
+        $('#btncollapzion').Collapzion({
+            _child_attribute: [
+                {% if communication_ways.company_n.all %}
+                {% for number in communication_ways.company_n.all %}
+                {
+                    'label': 'پشتیبانی تلفنی',
+                    'url': 'tel:{{ number.province_code }}{{ number.number }}',
+                    'icon': 'bi bi-telephone'
+                },
+                {% endfor %}
+                {% endif %}
+                {% if communication_ways.telegram_id %}
+                {
+                    'label': 'پشتیبانی تلگرام',
+                    'url': 'https://t.me/{{ communication_ways.telegram_id }}',
+                    'icon': 'bi bi-telegram'
+                },
+                {% endif %}
+                {% if communication_ways.phone_number %}
+                {
+                    'label': 'پشتیبانی واتس آپ',
+                    'url': 'https://wa.me/{{ communication_ways.phone_number }}',
+                    'icon': 'bi-whatsapp'
+                },
+                {% endif %}
+            ],
         });
-        // Check if the div element has been dismissed when the page loads
-        if (sessionStorage.getItem('fixedBoxDimissed') === 'true') {
-            document.getElementById("fixedTextBox").remove();
-        }
+        {% if fixedText and fixedText.status %}
+            $(window).on('load', function() {
+                let session = sessionStorage.getItem('fixedText');
+                if (session === 'false' || session === null) {
+                    {% if fixedText.title and fixedText.url %}
+                    Swal.fire({
+                        title: '{{ fixedText.title }}',
+                        text: '{{ fixedText.text }}',
+                        confirmButtonColor: "#2256d1",
+                        footer: '<a href="{{ fixedText.url }}">برای مشاهده کلیک کنید</a>',
+                    })
+                    {% elif fixedText.title %}
+                    Swal.fire({
+                        title: '{{ fixedText.title }}',
+                        text: '{{ fixedText.text }}',
+                        confirmButtonColor: "#2256d1",
+                    })
+                    {% elif fixedText.url %}
+                    Swal.fire({
+                        text: '{{ fixedText.text }}',
+                        confirmButtonColor: "#2256d1",
+                        footer: '<a href="{{ fixedText.url }}">برای مشاهده کلیک کنید</a>',
+                    })
+                    {% else %}
+                    Swal.fire({
+                        text: '{{ fixedText.text }}',
+                        confirmButtonColor: "#2256d1",
+                    })
+                    {% endif %}
+                    sessionStorage.setItem('fixedText', 'true')
+                }
+            });
+        {% endif %}
+    function disableOrder() {
+        Swal.fire({
+            text: 'لطفا برای ثبت سفارش این محصول با ما تماس بگیرید',
+            confirmButtonColor: "#2256d1",
+        })
+    }
     </script>
-{% endif %}
-
-<!-- All JS Plugins -->
-<script src="{% static 'js/plugins.js' %}"></script>
-<script src="{% static 'js/bootstrap.min.js' %}"></script>
-<script src="{% static 'js/axios.min.js' %}"></script>
-<script src="{% static 'js/sweetalert.min.js' %}"></script>
-<!-- Main JS -->
-<script src="{% static 'js/main.js' %}"></script>
-
 </body>
 </html>

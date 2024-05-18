@@ -1,5 +1,4 @@
 {% extends 'templates/base.html' %}
-{% load render_partial %}
 {% load jformat %}
 
 {% block head %}
@@ -10,111 +9,99 @@
 {% endblock %}
 
 {% block main %}
-    <!-- BREADCRUMB AREA START -->
-    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__breadcrumb-inner text-center">
-                        <h1 class="ltn__page-title">وبلاگ</h1>
-                        <div class="ltn__breadcrumb-list">
-                            <ul>
-                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a><i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i></li>
-                                <li>وبلاگ</li>
-                            </ul>
-                        </div>
-                    </div>
+ <!-- start breadcroumb -->
+    <div class="bread-crumb pt-3">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <nav aria-label="breadcrumb" class="my-lg-0 my-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'main:Home_page' %}" class="font-14 text-muted">خانه</a></li>
+                        <li class="breadcrumb-item active main-color-one-color font-14" aria-current="page">لیست مقالات</li>
+                    </ol>
+                </nav>
                 </div>
             </div>
         </div>
     </div>
-    <!-- BREADCRUMB AREA END -->
-
-    <!-- blog AREA START -->
-    {% if messages %}
-        {% for message in messages %}
-            <h5 class="alert alert-danger text-center">{{ message }}</h5>
-        {% endfor %}
-    {% endif %}
-
-    <div class="ltn__blog-area mb-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    <div class="row">
-                        <!-- blog Item -->
-                        {% for blog in blogs_list %}
-                            {% if blog.status %}
-                                <div class="col-sm-6">
-                                    <div class="ltn__blog-item">
-                                        <div class="ltn__blog-img">
-                                            <a href="{% url 'blog:detail' blog.slug %}">
-                                                <img src="{{ blog.img.url }}" alt="{{ blog.title }}">
-                                            </a>
+    <!-- end breadcroumb -->
+    <!-- start content -->
+    {% if blogs_list %}
+    <div class="content">
+        <div class="gird-post-blog py-20">
+            <div class="container-fluid">
+                <div class="row gy-3">
+                    {% for blog in blogs_list %}
+                        {% if blog.status %}
+                            <div class="col-lg-3">
+                                <div class="blog-item">
+                                    <a href="{% url 'blog:detail' blog.slug %}">
+                                        <div class="image">
+                                            <img src="{{ blog.img.url }}" alt="{{ blog.title }}" class="img-fluid">
                                         </div>
-                                        <div class="ltn__blog-brief">
-                                            <div class="ltn__blog-meta">
-                                                <ul style="color: black">
-                                                    <li class="ltn__blog-author">
-                                                        <span>{{ blog.author.first_name }} {{ blog.author.last_name }}</span>
-                                                    </li>
-                                                    <li>
-                                                        <span>{{ blog.created_at|jformat:"%Y/%m/%d" }}</span>
-                                                    </li>
-                                                    <li class="ltn__blog-comment">
-                                                        <span><i class="icon-speech"></i> {{ blog.comments.count }}</span>
-                                                    </li>
-                                                </ul>
+                                        <div class="title">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="title-item">
+                                                    <i class="bi bi-person me-1"></i>
+                                                    <span class="font-12">{{ blog.author.first_name }} {{ blog.author.last_name }}</span>
+                                                </div>
+                                                <div class="title-item">
+                                                    <i class="bi bi-alarm me-1"></i>
+                                                    <span class="font-12">{{ blog.created_at|jformat:"%Y/%m/%d" }}</span>
+                                                </div>
                                             </div>
-                                            <h2 class="ltn__blog-title blog-title-line" style="color: black">
-                                                <a href="{% url 'blog:detail' blog.slug %}">{{ blog.title }}</a>
-                                            </h2>
+                                            <h4 class="font-16 text-overflow-1 h4">{{ blog.title }}</h4>
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-
-                {% if blogs_list.has_other_pages %}
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="ltn__pagination-area text-center">
-                                <div class="ltn__pagination ltn__pagination-2">
-                                    <ul>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if blogs_list.has_other_pages %}
+                        <div class="col-12">
+                            <div class="my-paginate my-4">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination flex-wrap justify-content-center">
                                         {% if blogs_list.has_previous %}
-                                            <li><a href="?page={{ blogs_list.previous_page_number }}"><i
-                                                    class="icon-arrow-right"></i></a></li>
+                                            <li class="page-item">
+                                                <a class="page-link rounded-3" href="?page={{ blogs_list.previous_page_number }}" role="button">قبلی</a>
+                                            </li>
                                         {% else %}
-                                            <li class="disabled"><a><i class="icon-arrow-right"></i></a></li>
+                                            <li class="page-item disabled">
+                                                <a class="page-link rounded-3" href="#" role="button">قبلی</a>
+                                            </li>
                                         {% endif %}
 
                                         {% for i in blogs_list.paginator.page_range %}
                                             {% if blogs_list.number == i %}
-                                                <li class="active"><a href="?page={{ i }}">{{ i }}</a></li>
+                                                <li class="page-item active">
+                                                    <a class="page-link rounded-3" href="?page={{ i }}" role="button">{{ i }}</a>
+                                                </li>
                                             {% else %}
-                                                <li class=""><a href="?page={{ i }}">{{ i }}</a></li>
+                                                <li class="page-item">
+                                                    <a class="page-link rounded-3" href="?page={{ i }}">{{ i }}</a>
+                                                </li>
                                             {% endif %}
                                         {% endfor %}
 
                                         {% if blogs_list.has_next %}
-                                            <li><a href="?page={{ blogs_list.next_page_number }}"><i
-                                                    class="icon-arrow-left"></i></a></li>
+                                            <li class="page-item">
+                                                <a class="page-link rounded-3" href="?page={{ blogs_list.next_page_number }}">بعدی</a>
+                                            </li>
                                         {% else %}
-                                            <li class="disabled"><a><i class="icon-arrow-left"></i></a></li>
+                                            <li class="page-item disabled">
+                                                <a class="page-link rounded-3" href="#" role="button">بعدی</a>
+                                            </li>
                                         {% endif %}
                                     </ul>
-                                </div>
+                                </nav>
                             </div>
                         </div>
-                    </div>
-                {% endif %}
+                    {% endif %}
                 </div>
-
-                {% render_partial 'blog:blog-sideBarPartial' %}
             </div>
         </div>
     </div>
-    <!-- blog AREA END -->
-
+    {% endif %}
+    <!-- end content -->
 {% endblock %}

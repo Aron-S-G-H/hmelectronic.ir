@@ -6,12 +6,11 @@ import logging
 
 class ContactUs(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='کاربر', related_name='messages', null=True)
-    subject = models.CharField(max_length=50, verbose_name='موضوع')
     message = models.TextField(verbose_name='پیام')
     created_at = models.DateTimeField(verbose_name='تاریخ دریافت پیام', auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user} - {self.subject}"
+        return self.message
 
     class Meta:
         verbose_name = 'پیام'

@@ -11,8 +11,7 @@ class StaticSiteMap(Sitemap):
     def items(self):
         return [
             'main:AboutUs_Page',
-            'main:FrequentlyQuestions_Page',
-            'main:Home_Page',
+            'main:Home_page',
             'contactUs:contact_page',
             'account:login',
             'account:register',
@@ -29,7 +28,7 @@ class FaviconSitemap(Sitemap):
     protocol = 'https'
 
     def items(self):
-        return ['img/favicon.png']
+        return ['image/favicon.png']
 
     def location(self, item):
         return static(item)

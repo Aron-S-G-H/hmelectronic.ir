@@ -8,96 +8,88 @@
 {% endblock %}
 
 {% block main %}
-
-    <!-- BREADCRUMB AREA START -->
-    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__breadcrumb-inner text-center">
-                        <h1 class="ltn__page-title">حساب کاربری</h1>
-                        <div class="ltn__breadcrumb-list">
-                            <ul>
-                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a><i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i></li>
-                                <li>ورود</li>
-                            </ul>
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="vh-100">
+                <div class="row gy-2 justify-content-center align-items-center h-100">
+                    <div class="col-md-6">
+                        <div class="content-box">
+                            <div class="container-fluid">
+                                <div class="title-panel">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="font-18">فرم ورود به اچ ام الکترونیک</h6>
+                                        {% if logo %}
+                                            <img src="{{ logo.img.url }}" alt="logo" class="img-fluid" width="150">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <!--LOGIN FORM SECTION-->
+                                <form id="login-form">
+                                    <div class="form-group">
+                                        <label for="phone" class="form-label font-18">شماره تلفن :</label>
+                                        {{ loginForm.phone }}
+                                        <label for="passwd" class="form-label font-18">رمز عبور :</label>
+                                        {{ loginForm.password }}
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" id="submit-btn" class="btn border-0 main-color-one-bg w-100 py-3">ورود</button>
+                                    </div>
+                                    <div class="form-group d-flex justify-content-between">
+                                        <span role="button" id="forgot-passwd" class="text-center main-color-one-color border-animate fromCenter py-2 d-inline-block">رمز عبور خود را فراموش کرده اید ؟</span>
+                                        <a href="{% url 'account:register' %}" class="text-center main-color-one-color border-animate fromCenter py-2 d-inline-block">حساب کاربری ندارید؟ برای ساخت حساب کلیک کنید</a>
+                                    </div>
+                                </form>
+                                <!--FORGOT PASSWORD SECTION-->
+                                <form id="forgot-passwd-form" class="d-none">
+                                    <div id="f-email-section">
+                                        <div class="form-group">
+                                            <label for="email" class="form-label font-18">ایمیل :</label>
+                                            {{ forgot_password.email }}
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" class="btn border-0 main-color-one-bg w-100 py-3">ارسال</button>
+                                        </div>
+                                    </div>
+                                    <div id="f-code-section" class="d-none">
+                                        <div class="form-group">
+                                            <label for="code-input" class="form-label font-18">کد :</label>
+                                            <input type="text" name='code' placeholder="کد ارسال شده به ایمیل را وارد کنید" class='form-control py-4' id="code-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" class="btn border-0 main-color-one-bg w-100 py-3">ارسال کد</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <a href="{% url 'account:register' %}" role="button" class="text-center main-color-one-color border-animate fromCenter py-2 d-inline-block">حساب کاربری ندارید؟ برای ساخت حساب کلیک کنید</a>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- BREADCRUMB AREA END -->
 
-    <!-- LOGIN AREA START -->
-    <div class="ltn__login-area pb-85">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title-area text-center">
-                        <h1>به حساب <br> خود وارد شوید</h1>
-
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="account-login-inner">
-                        <!--LOGIN FORM SECTION-->
-                        <form class="ltn__form-box contact-form-box" id="loginForm">
-                            <h6 class="alert alert-danger text-center d-none" id="phoneError"></h6>
-                            {{ loginForm.phone }}
-                            <h6 class="alert alert-danger text-center d-none" id="passwordError"></h6>
-                            {{ loginForm.password }}
-                            <div class="btn-wrapper mt-0">
-                                <button class="theme-btn-1 btn btn-block" id="submitBtn" type="submit">ورود</button>
-                            </div>
-                            <div class="go-to-btn mt-20">
-                                <h6 style="color: black; cursor: pointer">ایا رمز خود را فراموش کرده اید؟</h6>
-                            </div>
-                        </form>
-                        <!--FORGOT PASSWORD SECTION-->
-                        <form class="ltn__form-box  contact-form-box d-none" id="f_form">
-                            {{ forgot_password.email }}
-                            <input type="text" name='code' placeholder="کد را وارد کنید..." class='d-none' id="codeInput">
-                            <div class="go-to-btn mb-4">
-                                <h6 style="color: black">برای بازیابی رمز عبور ایمیل خود را وارد کنید.</h6>
-                            </div>
-                            <div class="btn-wrapper mt-0">
-                                <button class="theme-btn-1 btn btn-block" type="submit" id="sendBtn">ارسال</button>
-                                <button class="theme-btn-1 btn btn-block d-none" type="submit" id="sendCodeBtn">ارسال کد</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
-                    <div class="account-create text-center pt-50">
-                        <h4>حساب کاربری ندارید؟</h4>
-                        <p>با ساخت حساب کاربری به ما در جهت خدمات رسانی بهتر یاری کنید .</p>
-                        <div class="btn-wrapper">
-                            <a href="{% url 'account:register' %}" class="theme-btn-1 btn black-btn">اکانت بسازید</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- LOGIN AREA END -->
+    <!-- این بی آر ها برای ایجاد اسکرول در صفحه هستند که تمام اجزای فرم به بدرستی نمایش داده شود و منوی موبایلی خودش را روی اجزای فرم نیندازد -->
+    <br><br><br><br><br><br><br><br>
+    <!-- end content -->
     <script>
         // login form section
-        let loginForm = document.getElementById('loginForm'); // login form
-        let phoneInput = document.getElementById('id_phone'); // email input in login form
-        let passwordInput = document.getElementById('id_password'); // password input in login form
-        let submitBtn = document.getElementById('submitBtn'); // submit button in login form
-        let forgotPasswordText = document.querySelector('#loginForm .go-to-btn h6') // forgot password text in login form
+        let loginForm = document.getElementById('login-form'); // login form
+        let phoneInput = document.getElementById('phone'); // email input in login form
+        let passwordInput = document.getElementById('passwd'); // password input in login form
+        let submitBtn = document.getElementById('submit-btn'); // submit button in login form
+        let forgotPasswordText = document.getElementById('forgot-passwd'); // forgot password text in login form
         // forgot password section
-        let f_passwordForm = document.getElementById('f_form'); // forgot password form
-        let f_passwordText = document.querySelector('#f_form .go-to-btn h6'); // help text in forgot password form
-        let f_emailInput = document.querySelector('#f_form #id_email'); // email input in forgot password form
-        let f_sendBtn = document.getElementById('sendBtn'); // submit button in forgot password form
-        let codeInput = document.querySelector('#f_form #codeInput'); // code input in forgot password form
-        let sendCodeBtn = document.getElementById('sendCodeBtn'); // send code button in forgot password form
+        let forgotPasswordForm = document.getElementById('forgot-passwd-form'); // forgot password form
+        let f_emailSection = forgotPasswordForm.querySelector('#f-email-section'); // email section in forgot password form
+        let f_codeSection = forgotPasswordForm.querySelector('#f-code-section'); // code section in forgot password form
+        let f_emailInput = f_emailSection.querySelector('input'); // email input in forgot password form
+        let f_sendBtn = f_emailSection.querySelector('button'); // submit button in forgot password form
+        let codeInput = f_codeSection.querySelector('input'); // code input in forgot password form
+        let sendCodeBtn = f_codeSection.querySelector('button'); // send code button in forgot password form
         
 
         function login(phone, password){
@@ -197,11 +189,8 @@
                         f_emailInput.disabled = false;
                     }
                     else if (response.status === 200){
-                        f_emailInput.style.display = 'none';
-                        codeInput.classList.remove('d-none');
-                        f_passwordText.innerText = 'کد ارسال شده به ایمیل تان را وارد کنید.';
-                        f_sendBtn.style.display = 'none';
-                        sendCodeBtn.classList.remove('d-none');
+                        f_emailSection.style.display = 'none';
+                        f_codeSection.classList.remove('d-none');
                     }
                 },
                 error: function (error) {
@@ -289,15 +278,11 @@
             let phone = phoneInput.value;
             let password = passwordInput.value;
             if (!phone){
-                let phoneError = document.getElementById('phoneError');
-                phoneError.classList.remove('d-none');
-                phoneError.innerText = 'شماره همراه خود را وارد کنید !';
+                phoneInput.classList.add('border-danger', 'border-2')
                 phoneInput.focus();
             }
             else if (!password){
-                let passwordError = document.getElementById('passwordError');
-                passwordError.classList.remove('d-none');
-                passwordError.innerText = 'رمز خود را وارد کنید !';
+                passwordInput.classList.add('border-danger', 'border-2')
                 passwordInput.focus();
             }
             else {
@@ -329,7 +314,7 @@
         // function to show the forgot password form
         forgotPasswordText.addEventListener('click', () => {
             loginForm.style.display = 'none';
-            f_passwordForm.classList.remove('d-none');
+            forgotPasswordForm.classList.remove('d-none');
             f_emailInput.focus();
         });
     </script>

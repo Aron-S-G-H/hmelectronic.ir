@@ -1,0 +1,65 @@
+{% load render_partial %}
+<div class="top-menu-parent">
+    <div class="row align-items-center">
+        <div class="col-lg-9">
+            <div class="top-menu-menu">
+                <ul class="navbar-nav align-items-center">
+                    <li class="position-relative m-0"></li>
+                    <li class="nav-item main-menu-head">
+                        <a role="button" class="nav-link border-animate main-color-one-bg fromCenter btn nav-active fw-bold">
+                            <i class="bi bi-list"></i>دسته بندی محصولات
+                        </a>
+                        <ul class="main-menu mega-container">
+                            {% for category in base_categories %}
+                                <li class="main-menu-sub-active-li">
+                                    <span class="px-1">{{ category.title }}</span>
+                                    <ul class="main-menu-sub back-menu"{% if category.img %} style=" background: #fff url('{{ category.img.url }}') no-repeat;" {% endif %}>
+                                        {% render_partial 'product:categoryPartial' category.slug %}
+                                    </ul>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'blog:list' %}" class="nav-link border-animate fromCenter">
+                            <i class="bi bi-file-earmark-text"></i>
+                            وبلاگ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'main:AboutUs_Page' %}" class="nav-link border-animate fromCenter">
+                            <i class="bi bi-info-circle"></i>
+                            درباره ما
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'contactUs:contact_page' %}" class="nav-link border-animate fromCenter">
+                            <i class="bi bi-telephone"></i>
+                            تماس با ما
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    {% if communication_ways %}
+        <div class="col-lg-3">
+            <div class="d-flex align-items-center justify-content-end">
+                {% if communication_ways.phone_number %}
+                    <a href="tel:{{ communication_ways.phone_number }}" class="main-color-one-bg btn border-0 d-flex align-items-center rounded-pill">
+                        {{ communication_ways.phone_number }}
+                        <i class="bi bi-phone text-white ms-2"></i>
+                    </a>
+                {% endif %}
+                {% if communication_ways.company_n.all %}
+                    {% for number in communication_ways.company_n.all %}
+                        <a href="tel:{{ number.province_code }}{{ number.number }}" class="main-color-two-bg btn border-0 d-flex align-items-center ms-3 rounded-pill">
+                            {{ number.province_code }}-{{ number.number }}
+                            <i class="bi bi-telephone-fill ms-2 text-white"></i>
+                        </a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    </div>
+</div>

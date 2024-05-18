@@ -18,7 +18,6 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'ckeditor',
     'widget_tweaks',
-    'admin_notification',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,7 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
     'django_cleanup.apps.CleanupConfig',
     'django_render_partial',
-    'django_social_share',
+    'django_json_widget',
     'hitcount',
     'jalali_date',
     'django_jalali',
@@ -137,13 +136,10 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-# Admin panel Notification Config----------------------------
-NOTIFICATION_MODEL = 'cart_app.UserOrder'
-
 # Zarinpal SETTING--------------------------------------------
-RSI_PUBLIC_KEY = os.path.join(BASE_DIR, '0480752990.txt')
 MERCHANT = config('ZARINPAL_MERCHANT')
 SANDBOX = config('ZARINPAL_SANDBOX', cast=bool, default=False)
+RSI_PUBLIC_KEY = os.path.join(BASE_DIR, '0480752990.txt')
 
 # GHASEDAK SETTING---------------------------------------------
 KAVENEGAR_APIKEY = config('KAVENEGAR_APIKEY')

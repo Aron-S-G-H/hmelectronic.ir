@@ -7,55 +7,31 @@
 {% endblock %}
 
 {% block main %}
-
-    <!-- BREADCRUMB AREA START -->
-    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__breadcrumb-inner text-center">
-                        <h1 class="ltn__page-title">حساب کاربری</h1>
-                        <div class="ltn__breadcrumb-list">
-                            <ul>
-                                <li>
-                                    <a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a>
-                                    <i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i>
-                                </li>
-                                <li>ثبت نام</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- BREADCRUMB AREA END -->
-
-    <!-- LOGIN AREA START (Register) -->
-    <div class="ltn__login-area pb-90">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title-area text-center">
-                        <h1>حساب کاربری <br>بررسی کد ارسال شده</h1>
-                        <p class="text-danger">کد ارسال شده به شماره تلفن خود را وارد کنید به انگلیسی وارد کنید</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-6 offset-lg-3">
-                    <div class="account-login-inner">
-                        <form action="{% url 'account:checkOtp_page' %}" method="post" class="ltn__form-box  contact-form-box">
-                            <h6 class="alert alert-danger text-center d-none" id="codeError"></h6>
-                            <input id="code" name="code" placeholder="کد ارسال شده را وارد کنید" type="text">
-
-                            <div class="btn-wrapper">
-                                <button class="theme-btn-1 btn btn-block" type="submit">ارسال کد</button>
-                            </div>
-                        </form>
-                        <div class="by-agree text-center">
-                            <div class="go-to-btn mt-50">
-                                <a href="{% url 'account:login' %}">قبلا حساب کاربر ساخته اید؟</a>
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="vh-100">
+                <div class="row gy-2 justify-content-center align-items-center h-100">
+                    <div class="col-md-6">
+                        <div class="content-box">
+                            <div class="container-fluid">
+                                <div class="title-panel">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="font-18">فرم ثبت نام اچ ام الکترونیک</h6>
+                                        {% if logo %}
+                                            <img src="{{ logo.img.url }}" alt="logo" class="img-fluid" width="150">
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <form>
+                                    <div class="form-group">
+                                        <label for="code" class="form-label font-18">کد ارسال شده را وارد کنید :</label>
+                                        <input type="number" required name="code" id="code" placeholder="کد ارسال شده را وارد کنید" class="form-control text-center py-4">
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" id="otp-submit" class="btn border-0 btnForm main-color-one-bg w-100 py-3">ارسال کد</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -63,16 +39,18 @@
             </div>
         </div>
     </div>
-    <!-- LOGIN AREA END -->
+    <br><br><br><br><br><br><br><br>
     <script>
         let codeInput = document.getElementById('code');
-        let codeError = document.getElementById('codeError');
-        let submitBtn = document.querySelector('.btn-wrapper button');
+        let submitBtn = document.getElementById('otp-submit');
         const urlParam = new URLSearchParams(window.location.search);
     
         function showError(message){
-            codeError.innerText = message;
-            codeError.classList.remove('d-none');
+            Swal.fire({
+                icon: 'error',
+                text: message,
+                confirmButtonColor: '#0068d7',
+            })
         }
         
         function submitOtpCode(code, token){
@@ -92,7 +70,7 @@
                         submitBtn.disabled = false;
                         codeInput.disabled = false;
                     }
-                    else {
+                    else if (response.status === 200) {
                         Swal.fire({
                             position: 'top-start',
                             icon: 'success',
@@ -118,8 +96,7 @@
             })
         }
     
-        submitBtn.addEventListener('click', event => {
-            event.preventDefault();
+        submitBtn.addEventListener('click', () => {
             let code = Number(codeInput.value);
             if (!urlParam.has('token')){
                 showError('توکن وجود ندارد !');

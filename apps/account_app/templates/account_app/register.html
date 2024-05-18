@@ -8,87 +8,102 @@
 {% endblock %}
 
 {% block main %}
-    <!-- BREADCRUMB AREA START -->
-    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__breadcrumb-inner text-center">
-                        <h1 class="ltn__page-title">حساب کاربری</h1>
-                        <div class="ltn__breadcrumb-list">
-                            <ul>
-                                <li>
-                                    <a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a>
-                                    <i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i>
-                                </li>
-                                <li>ثبت نام</li>
-                            </ul>
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="vh-100">
+                <div class="row gy-2 justify-content-center align-items-center h-100">
+                    <div class="col-md-6">
+                        <div class="content-box">
+                            <div class="container-fluid">
+                                <div class="title-panel">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="font-18">فرم ثبت نام اچ ام الکترونیک</h6>
+                                        {% if logo %}
+                                            <a href="{% url 'main:Home_page' %}">
+                                                <img src="{{ logo.img.url }}" alt="logo" class="img-fluid" width="150">
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% for error in form.non_field_errors %}
+                                    <p class="text-center text-danger form-control border-danger">{{ error }}</p>
+                                {% endfor %}
+                                <form action="{% url 'account:register' %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        {% if form.first_name.errors %}
+                                            {% for error in form.first_name.errors %}
+                                                <label for="name" class="form-label text-danger font-18">{{ error }}</label>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label for="name" class="form-label font-18">نام :</label>
+                                        {% endif %}
+                                        {{ form.first_name }}
+                                    </div>
+                                    <div class="form-group">
+                                        {% if form.last_name.errors %}
+                                            {% for error in form.last_name.errors %}
+                                                <label for="lastname" class="form-label text-danger font-18">{{ error }}</label>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label for="lastname" class="form-label font-18">نام خانوادگی :</label>
+                                        {% endif %}
+                                        {{ form.last_name }}
+                                    </div>
+                                    <div class="form-group">
+                                        {% if form.phone.errors %}
+                                            {% for error in form.phone.errors %}
+                                                <label for="phone" class="form-label text-danger font-18">{{ error }}</label>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label for="phone" class="form-label font-18">شماره تلفن :</label>
+                                        {% endif %}
+                                        {{ form.phone }}
+                                    </div>
+                                    <div class="form-group">
+                                        {% if form.email.errors %}
+                                            {% for error in form.email.errors %}
+                                                <label for="email" class="form-label text-danger font-18">{{ error }}</label>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label for="email" class="form-label font-18">ایمیل :</label>
+                                        {% endif %}
+                                        {{ form.email }}
+                                    </div>
+                                    <div class="form-group">
+                                        {% if form.password.errors %}
+                                            {% for error in form.password.errors %}
+                                                <label for="passwd" class="form-label text-danger font-18">{{ error }}</label>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label for="passwd" class="form-label font-18">رمز عبور :</label>
+                                        {% endif %}
+                                        {{ form.password }}
+                                    </div>
+                                    <div class="form-group">
+                                        {% if form.confirm_pass.errors %}
+                                            {% for error in form.confirm_pass.errors %}
+                                                <label for="conf-passwd" class="form-label text-danger font-18">{{ error }}</label>
+                                            {% endfor %}
+                                        {% else %}
+                                            <label for="conf-passwd" class="form-label font-18">تکرار رمز عبور :</label>
+                                        {% endif %}
+                                        {{ form.confirm_pass }}
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn border-0 main-color-one-bg w-100 py-3">ثبت نام</button>
+                                    </div>
+                                    <div class="form-group text-center">
+                                        <a href="{% url 'account:login' %}" class="text-center main-color-one-color border-animate fromCenter py-2 d-inline-block">حساب کاربری دارید ؟</a>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- BREADCRUMB AREA END -->
-
-    <!-- LOGIN AREA START (Register) -->
-    <div class="ltn__login-area pb-90">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title-area text-center">
-                        <h1>حساب کاربری <br>خود را بسازید</h1>
-
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-6 offset-lg-3">
-                    <div class="account-login-inner">
-                    {% for error in form.non_field_errors %}
-                        <p class="alert alert-danger text-center">{{ error }}</p>
-                    {% endfor %}
-                        <form action="{% url 'account:register' %}" method="post" class="ltn__form-box  contact-form-box">
-                            {% csrf_token %}
-                            {% for error in form.first_name.errors %}
-                                <p class="alert alert-danger text-center">{{ error }}</p>
-                            {% endfor %}
-                            {{ form.first_name }}
-
-                            {% for error in form.last_name.errors %}
-                                <p class="alert alert-danger text-center">{{ error }}</p>
-                            {% endfor %}
-                            {{ form.last_name }}
-
-                            {% for error in form.phone.errors %}
-                                <p class="alert alert-danger text-center">{{ error }}</p>
-                            {% endfor %}
-                            {{ form.phone }}
-
-                            {% for error in form.email.errors %}
-                                <p class="alert alert-danger text-center">{{ error }}</p>
-                            {% endfor %}
-                            {{ form.email }}
-
-                            {% for error in form.password.errors %}
-                                <p class="alert alert-danger text-center">{{ error }}</p>
-                            {% endfor %}
-                            {{ form.password }}
-                            {{ form.confirm_pass }}
-                            <div class="btn-wrapper">
-                                <button class="theme-btn-1 btn btn-block" type="submit">ثبت نام کنید</button>
-                            </div>
-                        </form>
-                        <div class="by-agree text-center">
-                            <div class="go-to-btn mt-50">
-                                <a href="{% url 'account:login' %}">قبلا حساب کاربر ساخته اید؟</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- LOGIN AREA END -->
-
+    <br><br><br><br><br><br><br><br>
 {% endblock %}

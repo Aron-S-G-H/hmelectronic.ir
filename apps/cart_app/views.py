@@ -1,16 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from apps.product_app.models import Product
-from apps.zarinpal_app.views import get_token
 from .cart_module import Cart
 from .forms import CheckoutForm
 from .models import UserOrder, ProductOrder
+from apps.zarinpal_app.views import get_token
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
 import weasyprint
 from django.http import HttpResponse, JsonResponse
 import json
-from django.urls import reverse
 
 
 class CartDetailView(View):
@@ -34,6 +33,8 @@ class CartAddView(View):
             product = Product.objects.get(id=pk)
         except:
             return JsonResponse({'status': 404})
+        if int(quantity) > product.number_of_product:
+            return JsonResponse({'status': 400})
         cart = Cart(request)
         if product_tip == 'A':
             price = product.tipA.first().price
@@ -109,6 +110,7 @@ class CheckOutView(View):
                     item_total=item['total'],
                 )
             request.session['user_order'] = new_order.id
+            request.session.set_expiry(600)
             amount = f'{new_order.total_price}0'
             token = get_token(int(amount), new_order.id)
             if token:

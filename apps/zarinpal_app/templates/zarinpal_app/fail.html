@@ -1,0 +1,55 @@
+{% extends 'templates/base.html' %}
+{% load jformat %}
+{% load humanize %}
+
+{% block head %}
+    <meta name="robots" content="noindex, nofollow" />
+    <title>فروشگاه اچ ام الکترونیک</title>
+{% endblock %}
+
+{% block main %}
+    <div class="bread-crumb pt-3">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <nav aria-label="breadcrumb" class="my-lg-0 my-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'main:Home_page' %}" class="font-14 text-muted">خانه</a></li>
+                        <li class="breadcrumb-item">صورت حساب</li>
+                        <li class="breadcrumb-item">انتقال به درگاه پرداخت</li>
+                        <li class="breadcrumb-item active main-color-one-color font-14" aria-current="page">نتیجه پرداخت</li>
+                    </ol>
+                </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <div class="payment-status fail-pay">
+                        <div class="icon">
+                            <i class="bi bi-emoji-frown-fill"></i>
+                        </div>
+                        <div class="title">
+                            {% if status == 'CT' %}
+                            <h3>پرداخت شما کنسل شد</h3>
+                            <p>در صورت نیاز به راهنمایی و مشاوره برای خرید میتوانید با ما تماس بگیرید</p>
+                            {% endif %}
+                            {% if status == 'VOCE' %}
+                            <h3>تایید پرداخت شما با خطا مواجه شد</h3>
+                            <p>در صورتی که هزینه سفارش از حساب شما کسر شده باشد مبلغ کسر شده به حساب شما برگشت داده خواهد شد . همچنین میتوانید با ما برای کسب اطمینان بیشتر تماس بگیرید</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-center my-4">
+                        <a href="{% url 'contactUs:contact_page' %}" class="btn d-inline-block main-color-two-bg mx-auto">تماس با ما</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

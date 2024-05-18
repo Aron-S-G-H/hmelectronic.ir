@@ -8,13 +8,12 @@ from .forms import SendEmailAdminForm
 
 @admin.register(ContactUs)
 class ContactUsAdmin(admin.ModelAdmin):
-    readonly_fields = ('user', 'subject', 'message', 'get_created_jalali')
-    list_display = ('user', 'subject', 'get_created_jalali')
-    list_filter = ('created_at',)
+    readonly_fields = ('user', 'message', 'created_at_jalali')
+    list_display = ('user', 'message', 'created_at_jalali')
     ordering = ('-created_at',)
 
     @admin.display(description='تاریخ دریافت پیام', ordering='created_at')
-    def get_created_jalali(self, obj):
+    def created_at_jalali(self, obj):
         return datetime2jalali(obj.created_at).strftime('%Y/%m/%d - %H:%M')
 
 

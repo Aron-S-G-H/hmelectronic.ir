@@ -1,32 +1,24 @@
 from django.shortcuts import render
-from apps.product_app.models import Tag
-from django.views.generic import View, TemplateView
+from django.views.generic import View
 from .models import Blog, Comment
 from django.http import JsonResponse
 from hitcount.views import HitCountDetailView
 from django.core.paginator import Paginator
-from django.contrib import messages
 
 
 class BlogListView(View):
     def get(self, request):
         blogs = Blog.objects.filter(status=True).select_related('author')
-        if not blogs:
-            messages.info(request, 'مقاله ای در سایت انتشار نیافته است !')
-            return render(request, 'blog_app/blogs-list.html')
         page_number = request.GET.get('page')
-        paginator = Paginator(blogs, 6)
+        paginator = Paginator(blogs, 12)
         blogs_list = paginator.get_page(page_number)
         return render(request, 'blog_app/blogs-list.html', {'blogs_list': blogs_list})
 
 
-class BlogSideBarPartial(TemplateView):
-    template_name = 'blog_app/blog-sideBar.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(BlogSideBarPartial, self).get_context_data(**kwargs)
-        context['product_tags'] = Tag.objects.all().defer('created_at')
-        return context
+class BlogSideBarPartial(View):
+    def get(self, request, pk):
+        recent_blogs = Blog.objects.exclude(id=pk).filter(status=True).select_related('author')[:10]
+        return render(request, 'blog_app/blog-sideBar.html', {'recent_blogs': recent_blogs})
 
 
 class BlogDetailView(HitCountDetailView):

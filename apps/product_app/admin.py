@@ -2,6 +2,7 @@ from django.contrib import admin
 from jalali_date import datetime2jalali
 from . import models
 from django import forms
+from django_json_widget.widgets import JSONEditorWidget
 from django.db import models as m
 from.forms import ProductAdminForm
 
@@ -49,18 +50,19 @@ class ProductAdmin(admin.ModelAdmin):
     form = ProductAdminForm
     readonly_fields = ('update_jalali', 'created_jalali')
     ordering = ('-created_at',)
-    list_display = ('product_name', 'price', 'status', 'selected_product', 'update_jalali', 'created_jalali')
+    list_display = ('product_name', 'price', 'status', 'selected_product', 'disable_order', 'number_of_product')
     list_filter = ('status', ProductCustomFilter)
     search_fields = ('product_name', 'slug')
     inlines = (ProductImageAdmin, TipAAdmin, CommentAdmin)
     prepopulated_fields = {'slug': ('product_name',)}
     filter_horizontal = ('category', 'tag')
-    list_editable = ('price', 'status', 'selected_product')
+    list_editable = ('price', 'status', 'selected_product', 'disable_order', 'number_of_product')
     formfield_overrides = {
         m.PositiveIntegerField: {'widget': forms.NumberInput(attrs={'size': '25'})},
         m.PositiveSmallIntegerField: {'widget': forms.NumberInput(attrs={'size': '15'})},
-        m.SlugField: {'widget': forms.TextInput(attrs={'size': 70})},
-        m.CharField: {'widget': forms.TextInput(attrs={'size': 70})},
+        m.SlugField: {'widget': forms.TextInput(attrs={'size': 120})},
+        m.CharField: {'widget': forms.TextInput(attrs={'size': 120})},
+        m.JSONField: {'widget': JSONEditorWidget},
     }
 
     @admin.display(description='تاریخ ایجاد', ordering='created_at')

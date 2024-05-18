@@ -57,7 +57,6 @@ def persian_to_english(number):
             changed_number += item
         else:
             changed_number += i
-    print(changed_number)
     return changed_number
 
 
@@ -72,9 +71,21 @@ def fullname_validator(value):
 
 class LoginForm(forms.Form):
     phone = forms.CharField(widget=forms.TextInput(
-        attrs={'name': 'phone', 'placeholder': 'شماره موبایل خود را وارد کنید ...'}))
+        attrs={
+            'name': 'phone',
+            'placeholder': 'شماره موبایل خود را وارد کنید',
+            'class': 'form-control py-4',
+            'id': 'phone'
+        }
+    ))
     password = forms.CharField(widget=forms.PasswordInput(
-        attrs={'name': 'password', 'placeholder': 'رمز خود را وارد کنید ...'}))
+        attrs={
+            'name': 'password',
+            'placeholder': 'رمز عبور خود را وارد کنید',
+            'class': 'form-control py-4',
+            'id': 'passwd'
+        }
+    ))
 
     def clean_phone(self):
         phone = self.cleaned_data['phone']
@@ -92,30 +103,68 @@ class LoginForm(forms.Form):
 
 class ForgotPasswordForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(
-        attrs={'name': 'email', 'placeholder': 'ایمیل خود را وارد کنید ...'}))
+        attrs={
+            'name': 'email',
+            'placeholder': 'ایمیل خود را برای بازیابی رمز عبور وارد کنید',
+            'id': 'email',
+            'class': 'form-control py-4',
+            'style': 'direction : rtl',
+        }
+    ))
 
 
 class RegisterForm(forms.Form):
     first_name = forms.CharField(required=True, widget=forms.TextInput(
-        attrs={'name': 'firstname', 'placeholder': 'نام'}),
+        attrs={
+            'name': 'firstname',
+            'placeholder': 'نام خود را وارد کنید',
+            'id': 'name',
+            'class': 'form-control py-4',
+        }),
         validators=[fullname_validator]
     )
     last_name = forms.CharField(required=True, widget=forms.TextInput(
-        attrs={'name': 'lastname', 'placeholder': 'نام خانوادگی'}),
+        attrs={
+            'name': 'lastname',
+            'placeholder': 'نام خانوادگی خود را وارد کنید',
+            'id': 'lastname',
+            'class': 'form-control py-4',
+        }),
         validators=[fullname_validator]
     )
     email = forms.EmailField(required=False, widget=forms.EmailInput(
-        attrs={'name': 'email', 'placeholder': 'آدرس ایمیل ( اختیاری )'}),
+        attrs={
+            'name': 'email',
+            'placeholder': 'آدرس ایمیل ( اختیاری )',
+            'id': 'email',
+            'class': 'form-control py-4',
+            'style': 'direction : rtl',
+        }),
         validators=[validators.EmailValidator()]
     )
     phone = forms.CharField(required=True, widget=forms.TextInput(
-        attrs={'name': 'phone', 'placeholder': 'شماره موبایل'}))
+        attrs={
+            'name': 'phone',
+            'placeholder': 'شماره موبایل خود را وارد کنید',
+            'id': 'phone',
+            'class': 'form-control py-4',
+        }))
     password = forms.CharField(required=True, widget=forms.PasswordInput(
-        attrs={'password': 'password', 'placeholder': 'رمز'}),
+        attrs={
+            'name': 'password',
+            'placeholder': 'رمز خود را وارد کنید',
+            'id': 'passwd',
+            'class': 'form-control py-4',
+        }),
         validators=[validators.MinLengthValidator(5)]
     )
     confirm_pass = forms.CharField(required=True, widget=forms.PasswordInput(
-        attrs={'name': 'confirmPassword', 'placeholder': 'تکرار رمز عبور'})
+        attrs={
+            'name': 'confirmPassword',
+            'placeholder': 'رمز عبور خود را تکرار کنید',
+            'id': 'conf-passwd',
+            'class': 'form-control py-4',
+        })
     )
 
     def clean_phone(self):

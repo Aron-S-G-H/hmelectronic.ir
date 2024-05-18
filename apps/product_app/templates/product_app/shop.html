@@ -1,9 +1,12 @@
 {% extends 'templates/base.html' %}
+{% load static %}
 {% load humanize %}
 
 {% block head %}
-    {% if meta_description and meta_url %}
+    {% if meta_description %}
         <meta name="description" content="{{ meta_description }}"/>
+    {% endif %}
+    {% if meta_url %}
         <meta name="canonical" content="https://hmelecteronic.ir/{{ meta_url }}" />
     {% endif %}
     <meta name="robots" content="index, follow" />
@@ -11,384 +14,327 @@
 {% endblock %}
 
 {% block main %}
-
-    <!-- BREADCRUMB AREA START -->
-    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__breadcrumb-inner text-center">
-                        <h1 class="ltn__page-title">فروشگاه</h1>
-                        <div class="ltn__breadcrumb-list">
-                            <ul>
-                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a>
-                                    <i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i>
-                                </li>
-                                <li>فروشگاه</li>
-                            </ul>
-                        </div>
-                    </div>
+    <!-- start bread croumb -->
+    <div class="bread-crumb pt-3">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <nav aria-label="breadcrumb" class="my-lg-0 my-2">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'main:Home_page' %}" class="font-14 text-muted">خانه</a></li>
+                            <li class="breadcrumb-item active main-color-one-color font-14" aria-current="page">{{ current }}</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
-    <!-- BREADCRUMB AREA END -->
-
+    <!-- end breadcroumb -->
     <script>
         function setDiscount(realPrice, specialPrice, elemId){
             let newPriceElements = document.getElementsByClassName(`product${elemId}`);
             let discountPrice = realPrice - specialPrice
             let discountPercent = (discountPrice * 100) / realPrice
-            discountPercent = Math.floor(discountPercent)
+            discountPercent = Math.round(discountPercent)
             for (let elem of newPriceElements){
-                elem.innerHTML = `${discountPercent}%`;
+                elem.innerHTML = `${discountPercent}% تخفیف`;
             }
         }
-        function setTimer(date, elemID){
-            let countDownDate = new Date(date).getTime();
-            let x = setInterval(function() {
-                let now = new Date().getTime();
-                let distance = countDownDate - now;
-                let days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                let timerElem = document.getElementById(`countdown${elemID}`)
-                timerElem.innerHTML = `
-                                   <div class="single px-1">
-                                       <span>${days}</span>
-                                       <span>روز</span>
-                                   </div>
-                                   <div class="single px-1">
-                                       <span>${hours}</span>
-                                       <span>ساعت</span>
-                                   </div>`;
-
-                if (distance < 0) {
-                    clearInterval(x);
-                    let formData = new FormData();
-                    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-                    formData.append('productID', elemID);
-                    axios.post('{% url "main:countdown_end" %}', formData)
-                        .then(response => {
-                            if (response.data.status === 200){
-                                Swal.fire({
-                                    position: 'top-start',
-                                    icon: 'info',
-                                    title: `فروش ویژه محصول${response.data.product_name} به پایان رسید `,
-                                    showConfirmButton: false,
-                                    timer: 2500
-                                }).then(() => {
-                                    window.location.reload();
-                                })
-                            }
-                            else if (response.data.status === 400){
-                                console.log('product countdown came up with code 400')
-                            }
-                            else {
-                                console.log('product countdown came up with unknown error')
-                            }
-                        }).catch(err => console.log(err))
-
-                }
-            }, 1000);
-        }
     </script>
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <!-- start filter in mobile -->
+            <div class="custom-filter d-lg-none d-block">
+                <button class="btn btn-filter-float border-0 main-color-two-bg shadow-box px-3 rounded-3 position-fixed"
+                    style="z-index: 999;bottom:80px;" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                    <i class="bi bi-funnel font-20 fw-bold text-white"></i>
+                    <span class="d-block font-14 text-white">فیلتر</span>
+                </button>
 
-    <!-- PRODUCT DETAILS AREA START -->
-    <div class="ltn__product-area ">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-9 order-lg-2 mb-100">
-                    <div class="ltn__shop-options">
-                        <ul>
-                            <li>
-                                <div class="ltn__grid-list-tab-menu ">
-                                    <div class="nav">
-                                        <a class="active show" data-toggle="tab" href="#liton_product_grid">
-                                            <i class="icon-grid"></i>
-                                        </a>
-                                        <a data-toggle="tab" href="#liton_product_list"><i class="icon-menu"></i></a>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
+                <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasRight"
+                    aria-labelledby="offcanvasRightLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasRightLabel">فیلتر ها</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
-
-                    {% if messages %}
-                        {% for message in messages %}
-                            <p class="alert alert-danger text-center">{{ message }}</p>
-                        {% endfor %}
-                    {% endif %}
-
-                    <div class="tab-content">
-                        <div class="tab-pane fade active show" id="liton_product_grid">
-                            <div class="ltn__product-tab-content-inner ltn__product-grid-view">
-                                <div class="row">
-                                    <!-- ltn__product-item -->
-                                    {% for product in products_list %}
-                                    <div class="col-xl-3 col-sm-4 col-6" style="padding-left: 0px; padding-right: 0px">
-                                        <div class="ltn__product-item text-center">
-                                            <div class="product-img">
-
-                                                {% for image in product.images.all|slice:':1' %}
-                                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">
-                                                        <img src="{{ image.img.url }}" alt="Product{{ product.id }}Image{{ image.id }}">
-                                                    </a>
-                                                {% endfor %}
-
-                                                {% if product.special_price or product.selected_product %}
-                                                    <div class="product-badge">
-                                                         <ul>
-                                                            {% if product.selected_product %}
-                                                                <li class="m-0 badge-1">برگزیده</li>
-                                                            {% endif %}
-                                                            {% if product.special_price and product.status %}
-                                                                 <li class="m-0 badge-2 product{{ product.id }}"></li>
-                                                                <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
-                                                            {% endif %}
-                                                         </ul>
-                                                    </div>
-                                                {% endif %}
-
-                                                <div class="product-hover-action product-hover-action-2">
-                                                    <ul>
-                                                        <li>
-                                                            <a href="{% url 'product:productDetail_page' product.id product.slug %}" title="مشاهده">
-                                                                <i class="icon-magnifier"></i>
-                                                            </a>
-                                                        </li>
-                                                        <li class="add-to-cart">
-                                                            {% if product.status %}
-                                                                <a href="{% url 'cart:addToCart' product.id %}" title="Add to Cart">
-                                                                    <span class="cart-text d-none d-xl-block">افزودن به سبد خرید</span>
-                                                                    <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
-                                                                </a>
-                                                            {% else %}
-                                                                <a>
-                                                                    <span class="cart-text d-none d-xl-block" style="color: red">محصول موجود نمی باشد</span>
-                                                                    <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
-                                                                </a>
-                                                            {% endif %}
-                                                        </li>
-                                                    </ul>
+                    <div class="offcanvas-body">
+                        <div class="filter-items position-sticky top-0">
+                            <div class="container-fluid">
+                                <div class="filter-item">
+                                    <h5 class="filter-item-title">جستجو</h5>
+                                    <div class="filter-item-content">
+                                        <div class="search-form">
+                                            <form action="{% url 'product:shop_page' %}" method="post">
+                                                {% csrf_token %}
+                                                <div class="search-filed">
+                                                    <input type="text" name="search" id="product_search_input" placeholder="جستجوی محصولات ..." class="form-control search-input">
+                                                    <button type="submit" class="btn search-btn main-color-one-bg rounded-pill">
+                                                        <i class="bi bi-search"></i>
+                                                    </button>
                                                 </div>
-                                            </div>
-
-                                            <div class="product-info" style="background-color: #eae9e9;height: 100px">
-                                                <h2 class="product-title">
-                                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">{{ product.product_name }}</a>
-                                                </h2>
-                                            {% if product.status %}
-                                                {% if not product.special_price %}
-                                                    <div class="product-price">
-                                                        <span>{{ product.price|intcomma:False }} تومان</span>
-                                                    </div>
-                                                {% else %}
-                                                    <div class="product-price">
-                                                        <span>{{ product.special_price|intcomma:False }} تومان</span>
-                                                        <del>{{ product.price|intcomma:False }}تومان</del>
-                                                    </div>
-                                                {% endif %}
-                                            {% else %}
-                                                <div class="product-price">
-                                                    <span style="color: #b00;">محصول موجود نمی باشد</span>
-                                                </div>
-                                            {% endif %}
-                                            {% if product.remaining_time and product.status %}
-                                                <div class="ltn__countdown font-weight-bolder" id="countdown{{ product.id }}"></div>
-                                                <script>setTimer('{{ product.remaining_time|date:"m/d/Y" }}', {{ product.id }})</script>
-                                            {% endif %}
-                                            </div>
+                                            </form>
                                         </div>
                                     </div>
-                                {% endfor %}
+                                </div>
+                                <div class="filter-item">
+                                    <h5 class="filter-item-title">قیمت</h5>
+                                    <div class="filter-item-content">
+                                        <form id="filter-form-mobile">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="number" name="min_price" min="1500000"
+                                                           class="form-control input-range-filter" placeholder="از 1,500,000">
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="number" name="max_price" min="1500000" max="80000000"
+                                                           class="form-control input-range-filter" placeholder="تا 80,000,000">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="filter-item text-center">
+                                    <button class="btn-outline-site" onclick="applyFilter('filter-form-mobile')">اعمال فیلتر</button>
+                                </div>
+                                <div class="filter-item">
+                                    <h5 class="filter-item-title">رنگ محصول</h5>
+                                    <div class="filter-item-content">
+                                        <div class="product-meta-color-items">
+                                        {% for tag in tags %}
+                                            <a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}" class="btn">
+                                                {{ tag.title }}
+                                            </a>
+                                        {% endfor %}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-
-                        <div class="tab-pane fade" id="liton_product_list">
-                            <div class="ltn__product-tab-content-inner ltn__product-list-view">
-                                <div class="row">
-                                    <!-- ltn__product-item -->
-                                    {% for product in products_list %}
-                                    <div class="col-lg-12">
-                                        <div class="ltn__product-item">
-                                            <div class="product-img">
-                                                {% for image in product.images.all|slice:':1' %}
-                                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">
-                                                        <img src="{{ image.img.url }}" alt="Product{{ product.id }}Image{{ image.id }}">
-                                                    </a>
-                                                {% endfor %}
-                                                 {% if product.special_price or product.selected_product %}
-                                                    <div class="product-badge">
-                                                         <ul>
-                                                            {% if product.selected_product %}
-                                                                <li class="m-0 badge-1">برگزیده</li>
-                                                            {% endif %}
-                                                            {% if product.special_price and product.status %}
-                                                                 <li class="m-0 badge-2 product{{ product.id }}"></li>
-                                                                <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
-                                                            {% endif %}
-                                                         </ul>
-                                                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row gy-3">
+                <div class="col-lg-3 d-lg-block d-none">
+                    <div class="filter-items position-sticky top-0">
+                        <div class="container-fluid">
+                            <div class="filter-item">
+                                <h5 class="filter-item-title">جستجو</h5>
+                                <div class="filter-item-content">
+                                    <div class="search-form">
+                                        <form action="{% url 'product:shop_page' %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="search-filed">
+                                                <input type="text" name="search" id="product_search_input" placeholder="جستجوی محصولات ..." class="form-control search-input">
+                                                <button type="submit" class="btn search-btn main-color-one-bg rounded-pill">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <h5 class="filter-item-title">قیمت</h5>
+                                <div class="filter-item-content">
+                                    <form id="filter-form">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <input type="number" name="min_price" min="1500000"
+                                                       class="form-control input-range-filter" placeholder="از 1,500,000">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="number" name="max_price" min="1500000" max="80000000"
+                                                       class="form-control input-range-filter" placeholder="تا 80,000,000">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="filter-item text-center">
+                                <button class="btn-outline-site" onclick="applyFilter('filter-form')">اعمال فیلتر</button>
+                            </div>
+                            <div class="filter-item">
+                                <h5 class="filter-item-title">تگ محصولات</h5>
+                                <div class="filter-item-content">
+                                    <div class="product-meta-color-items">
+                                        {% for tag in tags %}
+                                        <a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}" class="btn">
+                                            {{ tag.title }}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                {% if not products_list %}
+                    <div class="text-center">
+                        <img src="{% static 'image/item-not-found.png' %}" alt="product not found" height="300" width="300" class="img-fluid mx-auto d-block">
+                        <h6 class="font-18 mt-4">محصولی یافت نشد</h6>
+                    </div>
+                {% else %}
+                    <div class="category-items">
+                        <div class="row g-3">
+                            {% for product in products_list %}
+                                <div class="col-lg-4">
+                                    <div class="product-box ">
+                                        <div class="product-timer">
+                                            {% if product.special_price %}
+                                                <div class="timer-label">
+                                                    <span class="product{{ product.id }}"></span>
+                                                    <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
+                                                </div>
+                                            {% endif %}
+                                            {% if product.selected_product %}
+                                                <div>
+                                                    <img src="{% static 'image/star.png' %}" class="img-fluid" width="31px" alt="star logo" title="محصول برگزیده">
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{% url 'product:productDetail_page' product.id product.slug %}" title="{{ product.product_name }}">
+                                            <div class="product-image">
+                                                {% if product.images.count > 1 %}
+                                                    {% for image in product.images.all|slice:':2' %}
+                                                        <img src="{{ image.img.url }}" loading="lazy"
+                                                             alt="{{ product.product_name }}{% cycle '1' '2' %}"
+                                                             class="img-fluid {% cycle 'one-image' 'two-image' %}"
+                                                        >
+                                                    {% endfor %}
+                                                {% else %}
+                                                    {% for image in product.images.all|slice:':1' %}
+                                                        <img src="{{ image.img.url }}" loading="lazy" alt="{{ product.product_name }}" class="img-fluid">
+                                                    {% endfor %}
                                                 {% endif %}
                                             </div>
-                                            <div class="product-info">
-                                                <h2 class="product-title">
-                                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">{{ product.product_name }}</a>
-                                                </h2>
-                                                <div class="product-price">
-                                                    {% if product.status %}
-                                                        {% if not product.special_price %}
-                                                            <span style="color: #e55472;">{{ product.price|intcomma:False }} تومان</span>
-                                                        {% else %}
-                                                            <span style="color: #e55472;">{{ product.special_price|intcomma:False }} تومان</span>
-                                                            <del>{{ product.price|intcomma:False }}تومان</del>
-                                                        {% endif %}
-                                                    {% else %}
-                                                        <span style="color: #b00;">محصول موجود نمی باشد</span>
+                                        </a>
+                                        <div class="product-title">
+                                            <a href="{% url 'product:productDetail_page' product.id product.slug %}">
+                                                <div class="title">
+                                                    <p class="text-overflow-1">{{ product.product_name }}</p>
+                                                    {% if product.subtitle %}
+                                                        <span class="text-muted text-overflow-1">{{ product.subtitle }}</span>
                                                     {% endif %}
                                                 </div>
-                                                <div class="product-brief">
-                                                    <span>{{ product.property|truncatewords:40|safe }}</span>
+                                            </a>
+                                        </div>
+                                        {% if product.status %}
+                                            <div class="product-action">
+                                                 <div class="price">
+                                                    {% if product.special_price %}
+                                                        <p class="new-price">{{ product.special_price|intcomma:False }} تومان</p>
+                                                        <p class="old-price">{{ product.price|intcomma:False }} تومان</p>
+                                                    {% else %}
+                                                        <p class="new-price">{{ product.price|intcomma:False }} تومان</p>
+                                                    {% endif %}
                                                 </div>
-                                                <div class="product-hover-action product-hover-action-2">
-                                                    <ul>
-                                                        <li>
-                                                            <a href="{% url 'product:productDetail_page' product.id product.slug %}" title="مشاهده">
-                                                                <i class="icon-magnifier"></i>
-                                                            </a>
-                                                        </li>
-                                                        <li class="add-to-cart">
-                                                            {% if product.status %}
-                                                                <a href="{% url 'cart:addToCart' product.id %}" title="Add to Cart">
-                                                                    <span class="cart-text d-none d-xl-block">افزودن به سبد خرید</span>
-                                                                    <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
-                                                                </a>
-                                                            {% else %}
-                                                                <a>
-                                                                    <span class="cart-text d-none d-xl-block" style="color: red">محصول موجود نمی باشد</span>
-                                                                    <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
-                                                                </a>
-                                                            {% endif %}
-                                                        </li>
-                                                    </ul>
+                                                <div class="link">
+                                                    {% if product.disable_order %}
+                                                        <a href="#" onclick="disableOrder()" class="btn border-0 rounded-3 main-color-one-bg" role="button">
+                                                            <i class="bi bi-basket text-white"></i>
+                                                            <span class="text-white">خرید محصول</span>
+                                                        </a>
+                                                    {% else %}
+                                                        <a href="{% url 'cart:addToCart' product.id %}" class="btn border-0 rounded-3 main-color-one-bg" role="button">
+                                                            <i class="bi bi-basket text-white"></i>
+                                                            <span class="text-white">خرید محصول</span>
+                                                        </a>
+                                                    {% endif %}
                                                 </div>
                                             </div>
-                                        </div>
+                                        {% else %}
+                                            <div class="product-action text-center" style="display: block">
+                                                <div class="link">
+                                                    <a class="btn border-0 rounded-3 btn-danger w-100 disabled" role="button">
+                                                        <i class="bi bi-x-circle text-white"></i>
+                                                        <span class="text-white">ناموجود</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
                                     </div>
-                                    {% endfor %}
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                {% if products_list.has_other_pages %}
-                    <div class="ltn__pagination-area text-center">
-                        <div class="ltn__pagination ltn__pagination-2">
-                            <ul>
-                                {% if products_list.has_previous %}
-                                    <li><a href="?page={{ products_list.previous_page_number }}"><i class="icon-arrow-right"></i></a></li>
-                                {% else %}
-                                    <li class="disabled"><a><i class="icon-arrow-right"></i></a></li>
-                                {% endif %}
+                            {% endfor %}
+                            {% if products_list.has_other_pages %}
+                                <div class="col-12">
+                                    <div class="my-paginate my-4">
+                                        <nav aria-label="Page navigation example">
+                                            <ul class="pagination flex-wrap justify-content-center">
+                                                {% if products_list.has_previous %}
+                                                    <li class="page-item">
+                                                        <a class="page-link rounded-3 changePage" role="button" href="?page={{ products_list.previous_page_number }}">قبلی</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item disabled">
+                                                        <a class="page-link rounded-3" role="button" href="#">قبلی</a>
+                                                    </li>
+                                                {% endif %}
 
-                                {% for i in products_list.paginator.page_range %}
-                                    {% if products_list.number == i %}
-                                        <li class="active"><a href="?page={{ i }}">{{ i }}</a></li>
-                                    {% else %}
-                                        <li class=""><a href="?page={{ i }}">{{ i }}</a></li>
-                                    {% endif %}
-                                {% endfor %}
+                                                {% for i in products_list.paginator.page_range %}
+                                                    {% if products_list.number == i %}
+                                                        <li class="page-item active"><a class="page-link rounded-3 changePage" href="?page={{ i }}">{{ i }}</a></li>
+                                                    {% else %}
+                                                        <li class="page-item"><a class="page-link rounded-3 changePage" href="?page={{ i }}">{{ i }}</a></li>
+                                                    {% endif %}
+                                                {% endfor %}
 
-                                {% if products_list.has_next %}
-                                    <li><a href="?page={{ products_list.next_page_number }}"><i class="icon-arrow-left"></i></a></li>
-                                {% else %}
-                                    <li class="disabled"><a><i class="icon-arrow-left"></i></a></li>
-                                {% endif %}
-                            </ul>
+                                                {% if products_list.has_next %}
+                                                    <li class="page-item">
+                                                        <a class="page-link rounded-3 changePage" role="button" href="?page={{ products_list.next_page_number }}">بعدی</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item disabled">
+                                                        <a class="page-link rounded-3" role="button" href="#">بعدی</a>
+                                                    </li>
+                                                {% endif %}
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
                 </div>
-
-                <div class="col-lg-3  mb-100">
-                    <aside class="sidebar ltn__shop-sidebar">
-                        <!-- Search Widget -->
-                        <div class="widget ltn__search-widget">
-                            <form action="{% url 'product:shop_page' %}" method="post" id="productSearchForm">
-                                {% csrf_token %}
-                                <input type="text" name="search" placeholder="جست جو کنید..." id="productSearchInput">
-                                <button type="submit" id="productSearchSubmitBtn">
-                                    <i class="icon-magnifier"></i>
-                                </button>
-                            </form>
-                        </div>
-                        <!-- Category Widget -->
-                        <div class="widget ltn__menu-widget">
-                            {% if base_categories %}
-                                {% for base_category in base_categories %}
-                                    <div class="widget ltn__menu-widget">
-                                        <h4 class="ltn__widget-title">دسته بندی {{ base_category.title }}</h4>
-                                        <ul>
-                                            {% for category in base_category.main_categories.all %}
-                                                {% if category.title == 'براساس برند' and not category.parent%}
-                                                    {% for sub in category.subs.all %}
-                                                        <li>
-                                                            <a href="{% url 'product:categoryDetails_page' sub.id sub.slug %}">
-                                                                {{ sub.title }}
-                                                            </a>
-                                                        </li>
-                                                    {% endfor %}
-                                                {% elif category.base_category.title == 'یو پی اس و باتری' %}
-                                                    {% if not category.parent and not category.title == 'براساس کاربرد' %}
-                                                        <li>
-                                                            <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
-                                                                {{ category.title }}
-                                                            </a>
-                                                        </li>
-                                                    {% endif %}
-                                                {% elif category.base_category.title == 'تجهیزات سرمایشی و گرمایشی' %}
-                                                     {% if not category.parent %}
-                                                         <li>
-                                                             <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
-                                                                 {{ category.title }}
-                                                             </a>
-                                                         </li>
-                                                     {% endif %}
-                                                {% endif %}
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        <!-- Tagcloud Widget -->
-                        {% if tags %}
-                        <div class="widget ltn__tagcloud-widget">
-                            <h4 class="ltn__widget-title"> تگ ها</h4>
-                            <ul>
-                                {% for tag in tags %}
-                                    <li><a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}">{{ tag.title }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-                    </aside>
-                </div>
             </div>
         </div>
     </div>
-    <!-- PRODUCT DETAILS AREA END -->
-
+    <!-- end content -->
     <script>
-        let productSearchSubmitBtn = document.getElementById('productSearchSubmitBtn');
-        let productSearchInput = document.getElementById('productSearchInput');
-
-        productSearchSubmitBtn.addEventListener('click', function (event) {
-            event.preventDefault();
-            if (productSearchInput.value){
-                document.getElementById('productSearchForm').submit()
+        // PRODUCT FILTER - START
+        function applyFilter(formId) {
+            let filterForm = document.getElementById(formId);
+            let priceInputs = filterForm.querySelectorAll('input');
+            let maxPriceInput = priceInputs[1];
+            let minPriceInput = priceInputs[0];
+            if (maxPriceInput.value && minPriceInput.value) {
+                filterForm.submit();
             }
-        })
+        }
+        // PRODUCT FILTER - END
+
+        // CHANGE PAGE - START
+        if (window.location.search) {
+            const url = new URL(window.location.href);
+            let changePageButtons = document.getElementsByClassName('changePage');
+            for (let button of changePageButtons) {
+                button.addEventListener('click', event => {
+                    event.preventDefault();
+                    if (url.searchParams.has("page")) {
+                       url.searchParams.delete("page")
+                    }
+                    let parameter = button.attributes.href.value
+                    if (url.searchParams.size > 0) {
+                        parameter = parameter.replace("?", "&");
+                    }
+                    let newUrl = url.href + parameter;
+                    window.location.assign(newUrl);
+                })
+            }
+        }
+        // CHANGE PAGE - END
     </script>
 {% endblock %}

@@ -1,52 +1,57 @@
-<div class="col-lg-4">
-    <aside class="sidebar-area blog-sidebar ltn__right-sidebar">
-        {% if base_categories %}
-            {% for base_category in base_categories %}
-                <div class="widget ltn__menu-widget">
-                    <h4 class="ltn__widget-title">دسته بندی {{ base_category.title }}</h4>
-                    <ul>
-                        {% for category in base_category.main_categories.all %}
-                            {% if category.title == 'براساس برند' %}
-                                {% if not category.parent %}
-                                    {% for sub in category.subs.all %}
-                                        <li>
-                                            <a href="{% url 'product:categoryDetails_page' sub.id sub.slug %}">{{ sub.title }}</a>
-                                        </li>
-                                    {% endfor %}
-                                {% endif %}
-                            {% elif category.base_category.title == 'یو پی اس و باتری' %}
-                                {% if not category.parent and not category.title == 'براساس کاربرد' %}
-                                    <li>
-                                        <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
-                                            {{ category.title }}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% elif category.base_category.title == 'تجهیزات سرمایشی و گرمایشی' %}
-                                {% if not category.parent %}
-                                    <li>
-                                        <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
-                                            {{ category.title }}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <!-- Products Tags Section -->
-        {% if product_tags %}
-            <div class="widget ltn__tagcloud-widget">
-                <h4 class="ltn__widget-title">تگ های محصولات</h4>
-                <ul>
-                    {% for tag in product_tags %}
-                        <li><a href="{% url 'product:shop_page' %}?tag={{ tag.slug }}">{{ tag.title }}</a></li>
+{% load jformat %}
+<div class="latest-posts">
+    <div class="content-box">
+        <div class="container-fluid">
+            <div class="title-panel mb-2">
+                <h6 class="title">آخرین مطالب وبلاگ</h6>
+            </div>
+            <nav class="navbar">
+                <ul class="navbar-nav">
+                    {% for blog in recent_blogs %}
+                        <li class="nav-item">
+                            <a href="{% url 'blog:detail' blog.slug %}" class="nav-link">
+                                <div class="mini-blog-item">
+                                    <div class="image">
+                                        <img src="{{ blog.img.url }}" class="img-fluid" alt="{{ blog.title }}">
+                                    </div>
+                                    <div class="d-flex align-items-start desc flex-wrap flex-column justify-content-between">
+                                        <h5 class="title">{{ blog.title }}</h5>
+                                        <div class="d-flex align-items-center">
+                                            <p class="text-muted mb-0">{{ blog.created_at|jformat:"%Y/%m/%d" }}</p>
+                                            <div class="text-end ms-2">
+                                                <i class="bi bi-arrow-left main-color-one-color"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
                     {% endfor %}
                 </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<div class="sugget-pro-in-blog-post mt-3">
+    <div class="content-box">
+        <div class="container-fluid">
+            <div class="title-panel mb-2">
+                <h6 class="title">تازه ترین مطلب</h6>
             </div>
-        {% endif %}
-    </aside>
+            {% for blog in recent_blogs|slice:':1' %}
+                <div class="blog-news-item mt-4">
+                    <a href="{% url 'blog:detail' blog.slug %}">
+                        <img src="{{ blog.img.url }}" class="img-fluid" alt="{{ blog.title }}">
+                        <div class="desc">
+                            <h3 class="title">{{ blog.title }}</h3>
+                            <div class="date">
+                                <span class="text-date">{{ blog.created_at|jformat:"%Y/%m/%d" }}</span>
+                                <i class="bi bi-arrow-left"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>

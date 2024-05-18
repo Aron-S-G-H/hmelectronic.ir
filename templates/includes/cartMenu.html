@@ -1,56 +1,100 @@
 {% load humanize %}
-<div id="ltn__utilize-cart-menu" class="ltn__utilize ltn__utilize-cart-menu">
-    <div class="ltn__utilize-menu-inner ltn__scrollbar">
-        <div class="ltn__utilize-menu-head">
-            <span class="ltn__utilize-menu-title">سبد خرید</span>
-            <button class="ltn__utilize-close">×</button>
-        </div>
-        {% if not cart.cart_quantity %}
-            <h6 class="alert alert-danger text-center">محصولی در سبد خرید نمی باشد</h6>
-        {% endif %}
-        <div class="mini-cart-product-area ltn__scrollbar">
-            {% for item in cart %}
-            <div class="mini-cart-item clearfix">
-                <div class="mini-cart-img">
-                    <a href="{% url 'product:productDetail_page' item.product.id item.product.slug %}">
-                        {% for product_image in item.product.images.all|slice:':1' %}
-                            <img src="{{ product_image.img.url }}" alt="{{ item.product.product_name }}">
-                        {% endfor %}
-                    </a>
-                    <span class="mini-cart-item-delete" onclick="removeFromCart('{{ item.unique_id }}')"><i class="icon-trash"></i></span>
-                </div>
-                <div class="mini-cart-info">
-                    <h6>
-                        <a href="{% url 'product:productDetail_page' item.product.id item.product.slug %}">{{ item.product.product_name }}</a>
-                    </h6>
-                    <span class="mini-cart-quantity">{{ item.price|intcomma:False }}x{{ item.quantity }} تومان</span>
+<div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasCartLabel">سبد خرید</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+    <div class="cart-canvases">
+        {% for item in cart %}
+            <div class="item">
+                <div class="row gy-2">
+                    <div class="col-4">
+                        <div class="image">
+                            {% for product_image in item.product.images.all|slice:':1' %}
+                                <img src="{{ product_image.img.url }}" alt="product image{{ item.product_id }}" class="img-fluid">
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <a href="{% url 'product:productDetail_page' item.product_id item.product.slug %}">
+                            <div class="title">
+                                <h6 class="font-14">{{ item.product.product_name }}</h6>
+                                <p class="mb-0 text-muted font-12 mt-2">{{ item.product.subtitle }}</p>
+                            </div>
+                            <div class="price">
+                                <p class="text-end mb-2 price-off fw-bold">{{ item.price|intcomma:False }} تومان</p>
+                                {% if item.discount_percent %}
+                                    <p class="text-end price-discount">{{ item.product.price|intcomma:False }} تومان</p>
+                                {% endif %}
+                            </div>
+                            <div class="action d-flex justify-content-between align-items-center">
+                                <div class="remove bg-light rounded-3">
+                                    <a href="#" role="button" onclick="removeFromCart('{{ item.unique_id }}')" title="حدف از سبد خرید">
+                                        <i class="bi bi-x font-25"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-        <div class="mini-cart-footer">
-            <div class="mini-cart-sub-total">
-                <h5>جمع خرید: <span>{{ cart.total|intcomma:False }} تومان</span></h5>
-            </div>
-            <div class="btn-wrapper">
-                <a href="{% url 'cart:detail_page' %}" class="theme-btn-1 btn btn-effect-1">مشاهده سبد خرید</a>
-                {% if not cart.cart_quantity %}
-                    <a href="#" class="theme-btn-2 btn btn-effect-2 disabled">پرداخت</a>
-                {% else %}
-                    <a href="{% url 'cart:checkOut_page' %}" class="theme-btn-2 btn btn-effect-2">پرداخت</a>
-                {% endif %}
+        {% endfor %}
+        <div class="item">
+            <div class="factor">
+                <div class="title">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-bag-check"></i>
+                        <h6 class="font-16">سفارش شما</h6>
+                    </div>
+                </div>
+                <div class="d-flex mb-3 align-items-center justify-content-between">
+                    <p class="fw-bold mb-0">محصول</p>
+                    <p class="fw-bold mb-0">قیمت کل</p>
+                </div>
+                {% for item in cart %}
+                    <div class="factor-item p-2 rounded-3 shadow-sm bg-light d-flex align-items-center justify-content-between">
+                        <p class="mb-0">{{ item.product.product_name }}</p>
+                        <p class="mb-0">{{ item.total|intcomma:False }} تومان</p>
+                    </div>
+                {% endfor %}
+                <div class="factor-item p-2 rounded-3 shadow-sm bg-light d-flex align-items-center justify-content-between">
+                    <p class="mb-0 fw-bold">جمع کل:</p>
+                    <p class="mb-0">{{ cart.total|intcomma:False }} تومان</p>
+                </div>
+                <div class="action mt-3 d-flex align-items-center justify-content-center">
+                    <a href="{% url 'cart:detail_page' %}" class="btn border-0 main-color-two-bg rounded-3">سبد خرید</a>
+                    {% if not cart.cart_quantity %}
+                        <a href="#" class="btn border-0 main-color-one-bg rounded-3 ms-2 disabled" role="button">تسویه حساب</a>
+                    {% else %}
+                        <a href="{% url 'cart:checkOut_page' %}" class="btn border-0 main-color-one-bg rounded-3 ms-2">تسویه حساب</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </div>
 <script>
     function removeFromCart(uniqueID){
-        axios.get(`/cart/remove/${uniqueID}`)
-            .then(response => {
-                if (response.data.status === 200){
+        $.ajax({
+            url: `/cart/remove/${uniqueID}`,
+            type: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+            },
+            success: function (response) {
+                if (response.status === 200){
                     window.location.reload();
                 }
-            })
-            .catch(err => console.log(err))
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'خطایی رخ داده است! وضعیت اینترنت خود را بررسی کنید و دوباره امتحان کنید. در صورت برطرف نشدن مشکل با پشتیبانی تماس بگیرید.',
+                    confirmButtonColor: '#3085d6',
+                })
+                console.log(error)
+            }
+        })
     }
 </script>

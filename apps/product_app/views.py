@@ -5,7 +5,6 @@ from django.views.generic import View
 from .models import Product, Comment, Category, Tag
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from django.contrib import messages
 from hitcount.views import HitCountDetailView
 from jalali_date import datetime2jalali
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -14,41 +13,52 @@ import random
 
 class Shop(View):
     def get(self, request):
-        tag_slug = request.GET.get('tag')
+        tag_slug = request.GET.get('tag', None)
+        max_price = request.GET.get('max_price', None)
+        min_price = request.GET.get('min_price', None)
         if tag_slug:
             products = Product.objects.filter(
-                tag__slug__exact=tag_slug
+                tag__slug=tag_slug
             ).prefetch_related('category', 'tag').defer('description', 'property', 'created_at', 'update_at')
         else:
             products = Product.objects.filter(
                 Q(selected_product=True) | Q(remaining_time__isnull=False)
             ).prefetch_related('category', 'tag').defer('description', 'property', 'created_at', 'update_at')
+        if max_price and min_price:
+            products = products.filter(price__gte=int(min_price), price__lt=int(max_price))
 
         tags = Tag.objects.all().defer('created_at')
+        page_number = request.GET.get('page')
+        paginator = Paginator(products, 1)
+        products_list = paginator.get_page(page_number)
+        context = {'products_list': products_list, 'tags': tags}
+        if tag_slug:
+            context['meta_description'] = f'لیست محصولاتی که دارای برچسب یا تگ {tag_slug} هستند در اچ ام الکترونیک با بهترین کیفیت و ضمانت اصالت کالا'
+            context['meta_url'] = f'shop/?tag={tag_slug}'
+            context['current'] = f'محصولات دارای تگ {tag_slug}'
+        else:
+            context['meta_description'] = 'لیست محصولات برگزیده و تخفیف خورده اچ ام الکترونیک صرفه جویی در هزینه و کیفیت بالا'
+            context['meta_url'] = 'shop/'
+            context['current'] = 'محصولات برگزیده و تخفیف خورده'
+        return render(request, 'product_app/shop.html', context)
+
+    def post(self, request):
+        search_query = request.POST.get('search', None)
+        products = Product.objects.filter(
+            product_name__icontains=search_query
+        ).prefetch_related('category', 'tag').defer('description', 'property', 'created_at', 'update_at')
+        tags = Tag.objects.all().defer('created_at')
+        if not products:
+            return render(request, 'product_app/shop.html', {'tags': tags, 'current': f'جست و جوی برای {search_query}'})
         page_number = request.GET.get('page')
         paginator = Paginator(products, 12)
         products_list = paginator.get_page(page_number)
         context = {
             'products_list': products_list,
             'tags': tags,
-            'meta_description': 'لیست محصولات تخفیف خورده ما صرفه جویی در هزینه و کیفیت بالا',
-            'meta_url': 'shop/'
+            'current': f'جست و جوی برای {search_query}',
         }
         return render(request, 'product_app/shop.html', context)
-
-    def post(self, request):
-        query = request.POST.get('search')
-        products = Product.objects.filter(
-            product_name__icontains=query
-        ).prefetch_related('category', 'tag').defer('description', 'property', 'created_at', 'update_at')
-        tags = Tag.objects.all().defer('created_at')
-        if not products:
-            messages.info(request, 'محصولی با این نام برای نمایش وجود ندارد !')
-            return render(request, 'product_app/shop.html', {'tags': tags})
-        page_number = request.GET.get('page')
-        paginator = Paginator(products, 12)
-        products_list = paginator.get_page(page_number)
-        return render(request, 'product_app/shop.html', {'products_list': products_list, 'tags': tags})
 
 
 class CategoryPartialView(View):
@@ -74,7 +84,7 @@ class ProductDetailView(HitCountDetailView):
         context = super(ProductDetailView, self).get_context_data(**kwargs)
         product = Product.objects.get(id=self.kwargs['pk'], slug=self.kwargs['slug'])
         product_tag = product.tag.first()
-        list_similar_products = list(Product.objects.filter(tag__slug=product_tag.slug, status=True).prefetch_related('category', 'tag'))
+        list_similar_products = list(Product.objects.filter(tag__slug=product_tag.slug, status=True).exclude(id=self.kwargs['pk']).prefetch_related('category', 'tag'))
         len_list = len(list_similar_products)
         num_similar_products = 8 if len_list > 8 else len_list
         random_products = random.sample(list_similar_products, k=num_similar_products)
@@ -98,6 +108,8 @@ class ProductDetailView(HitCountDetailView):
 
 class CategoryDetailView(View):
     def get(self, request, slug, pk):
+        max_price = request.GET.get('max_price', None)
+        min_price = request.GET.get('min_price', None)
         try:
             category = Category.objects.get(slug=slug, id=pk)
             if not category.parent:
@@ -107,21 +119,21 @@ class CategoryDetailView(View):
         except Category.DoesNotExist:
             raise Http404
 
-        categories = Category.objects.filter(parent=None).select_related('base_category', 'parent')
-        tags = Tag.objects.all().defer('created_at')
+        if max_price and min_price:
+            products = products.filter(price__gte=int(min_price), price__lt=int(max_price))
 
+        tags = Tag.objects.all().defer('created_at')
         if not products:
-            messages.info(request, 'محصولی برای نمایش وجود ندارد !')
-            return render(request, 'product_app/shop.html', {'categories': categories, 'tags': tags})
+            return render(request, 'product_app/shop.html', {'tags': tags, 'current': category.title})
         page_number = request.GET.get('page')
         paginator = Paginator(products, 12)
         products_list = paginator.get_page(page_number)
         context = {
             'products_list': products_list,
-            'categories': categories,
             'tags': tags,
             'meta_description': 'در این دسته بندی مجموعه متنوع ما از تجهیزات الکترونیکی با کیفیت بالا را مرور کنید',
-            'meta_url': f'shop/category-details/{pk}/{slug}'
+            'meta_url': f'shop/category-details/{pk}/{slug}',
+            'current': category.title,
         }
         return render(request, 'product_app/shop.html', context)
 

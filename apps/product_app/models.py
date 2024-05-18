@@ -1,26 +1,19 @@
 from django.db import models
 from ckeditor.fields import RichTextField
 from apps.account_app.models import CustomUser
+from apps.home_app.models import SliderLogo
 from django.utils.html import mark_safe
 from django.urls import reverse
 from hitcount.models import HitCount
 from django.contrib.contenttypes.fields import GenericRelation
 from django_jalali.db.models import jDateTimeField, jDateField
-from .mixins import MetaDescriptionMixin
+from .mixins import MetaDescriptionMixin, TimeStampMixin
 
 
 class BaseCategory(models.Model):
-    title = models.CharField(
-        max_length=30,
-        verbose_name='عنوان دسته بندی',
-        unique=True
-    )
-    slug = models.SlugField(
-        allow_unicode=True,
-        verbose_name='اسلاگ',
-        help_text='این فیلد به صورت خودکار تکمیل می شود',
-        null=True
-    )
+    title = models.CharField(max_length=30, verbose_name='عنوان دسته بندی', unique=True, help_text='۳۰ کاراکتر')
+    img = models.ImageField(upload_to='base_category', verbose_name='تصویر پس زمینه', null=True, blank=True)
+    slug = models.SlugField(allow_unicode=True, verbose_name='اسلاگ', help_text='این فیلد به صورت خودکار تکمیل می شود', null=True)
 
     def __str__(self):
         return self.title
@@ -47,6 +40,7 @@ class Category(models.Model):
         blank=True,
         help_text='درصورتی که دسته بندی شما زیرمجموعه دسته بندی دیگری باشد. از این قسمت انتخاب کنید'
     )
+    icon = models.ImageField(upload_to='category', null=True, blank=True, verbose_name='آیکون', help_text='اندازه تصویر : 400 × 400')
     title = models.CharField(
         max_length=60,
         verbose_name='عنوان دسته بندی',
@@ -64,36 +58,34 @@ class Category(models.Model):
     def __str__(self):
         return self.title
 
+    def has_icon(self):
+        if self.icon:
+            return True
+        else:
+            return False
+
     class Meta:
         verbose_name = 'دسته بندی'
         verbose_name_plural = 'دسته بندی ها'
 
 
-class Product(MetaDescriptionMixin, models.Model):
-    category = models.ManyToManyField(
-        Category,
-        related_name='products',
-        verbose_name='دسته بندی',
+class Product(TimeStampMixin, MetaDescriptionMixin, models.Model):
+    category = models.ManyToManyField(Category, related_name='products', verbose_name='دسته بندی')
+    brand = models.ForeignKey(
+        SliderLogo,
+        related_name='product_brands', verbose_name='اسم برند',
+        on_delete=models.SET_NULL, null=True, blank=True
     )
-    product_name = models.CharField(
-        max_length=150,
-        verbose_name='اسم محصول',
-        help_text='۱۰۰کاراکتر مجاز است',
-        db_index=True,
-    )
+    product_name = models.CharField(max_length=150, verbose_name='اسم محصول', help_text='۱۵۰ کاراکتر', db_index=True)
     subtitle = models.CharField(
         max_length=150,
         verbose_name='اسم محصول به انگلیسی',
-        db_index=True,
-        null=True,
-        blank=True,
-        help_text='۱۵۰ کاراکتر مجاز است - optional'
+        db_index=True, null=True, blank=True,
+        help_text='۱۵۰ کاراکتر'
     )
     description = RichTextField(verbose_name='توضیحات')
-    property = RichTextField(
-        verbose_name='ویژگی محصول',
-        help_text='ویژگی هایی که محصول داره را در این قسمت بنویسید'
-    )
+    property = RichTextField(verbose_name='ویژگی محصول', help_text='ویژگی هایی که محصول داره را در این قسمت بنویسید')
+    technical_specs = models.JSONField(verbose_name='مشخصات فنی', null=True, blank=True)
     price = models.PositiveIntegerField(
         verbose_name='قیمت اصلی',
         help_text='قیمت را به تومان وارد کنید | برای محصولات ریزان الکتریک قیمت تیپ B را وارد کنید',
@@ -101,8 +93,7 @@ class Product(MetaDescriptionMixin, models.Model):
     )
     special_price = models.PositiveIntegerField(
         verbose_name='قیمت فروش ویژه',
-        blank=True,
-        null=True,
+        blank=True, null=True,
         help_text='قیمت را به تومان وارد کنید'
     )
     remaining_time = models.DateField(
@@ -114,7 +105,17 @@ class Product(MetaDescriptionMixin, models.Model):
     selected_product = models.BooleanField(
         default=False,
         verbose_name='محصول برگزیده',
-        help_text='در صورت فعال بودن گزینه،این محصول در بخش محصولات برگزیده نمایش داده می شود'
+        help_text='در صورت فعال بودن گزینه ، این محصول در بخش محصولات برگزیده نمایش داده می شود'
+    )
+    disable_order = models.BooleanField(
+        default=False,
+        verbose_name='ثبت سفارش غیرفعال',
+        help_text='در صورت فعال بودن گزینه , امکان ثبت سفارش محصول غیرفعال میشود'
+    )
+    number_of_product = models.PositiveIntegerField(
+        verbose_name='تعداد محصول',
+        default=5,
+        help_text='تعداد محصول موجود و قابل سفارش',
     )
     tag = models.ManyToManyField(
         'Tag',
@@ -133,8 +134,6 @@ class Product(MetaDescriptionMixin, models.Model):
         help_text='این فیلد به صورت خودکار تکمیل می شود',
         db_index=True,
     )
-    update_at = models.DateTimeField(auto_now=True, verbose_name='تاریخ آپدیت محصول')
-    created_at = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
     hit_count_generic = GenericRelation(
         HitCount,
         object_id_field='object_pk',
@@ -163,7 +162,7 @@ class ProductImage(models.Model):
     img = models.ImageField(
         upload_to='product',
         verbose_name='عکس محصول',
-        help_text='حداقل سایز تصاویر 600x700 پیکسل باشد'
+        help_text='اندازه تصویر : 800 × 800'
     )
 
     def __str__(self):

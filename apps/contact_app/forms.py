@@ -6,19 +6,14 @@ from django.contrib.auth import get_user_model
 class ContactUsForm(forms.ModelForm):
     class Meta:
         model = ContactUs
-        exclude = ('user', 'created_at')
+        fields = ('message',)
         widgets = {
-            'subject': forms.TextInput(attrs={
-                'name': 'subject',
-                'id': 'subject',
-                'placeholder': 'موضوع:',
-                'maxlength': '100',
-            }),
             'message': forms.Textarea(attrs={
                 'name': 'message',
-                'id': 'message',
+                'id': 'commentbody',
                 'placeholder': 'متن پیام...',
-                'rows': '8',
+                'rows': '7',
+                'class': 'form-control',
             }),
         }
 

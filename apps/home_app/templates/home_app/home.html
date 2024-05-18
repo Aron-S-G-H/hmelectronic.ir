@@ -4,225 +4,466 @@
 {% load humanize %}
 
 {% block head %}
-    <meta name="description" content="فروشگاه تجهیزات الکترونیکی اچ ام الکترونیک نماینده رسمی شرکت فاراتل"/>
+    <meta name="description" content="فروشگاه تجهیزات الکترونیکی اچ ام الکترونیک نماینده رسمی شرکت فاراتل. فروش انواع استابلایزر,ترانس و یو پی اس"/>
     <meta name="robots" content="index, follow" />
     <meta name="canonical" content="https://www.hmelecteronic.ir, https://hmelecteronic.ir" />
     <title>فروشگاه اچ ام الکترونیک</title>
 {% endblock %}
 
 {% block main %}
-    <div class="ltn__utilize-overlay"></div>
-<!-- Carousel -->
-    <div id="demo" class="carousel slide carousel-fade" data-bs-ride="carousel">
-        <!-- The slideshow/carousel -->
-        <div class="carousel-inner">
-            {% for image in sliderBannerImages %}
-                <a {% if image.url_address %}href="{{ image.url_address }}"{% endif %}>
-                    <div class="carousel-item {% if image.sort_number == 1 %}active{% endif %}" data-bs-interval="5000">
-                        <img src="{{ image.img.url }}" alt="Banner slider {{ image.sort_number }}" class="d-block w-100">
-                    </div>
-                </a>
-            {% endfor %}
-        </div>
-        <!-- Left and right controls/icons -->
-        <button class="carousel-control-next slick-arrow mr-2 ml-2" type="button" data-bs-target="#demo" data-bs-slide="next">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-prev mr-2 ml-2" type="button" data-bs-target="#demo" data-bs-slide="prev">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-    </div>
-    <!-- SLIDER AREA END -->
-
-    <!-- BANNER AREA START -->
-    {% if sectionOneBanners %}
-        <div class="ltn__banner-area mt-20">
-            <div class="container">
-                <div class="row justify-content-center">
-                    {% for banner in sectionOneBanners %}
-                        <div class="col-lg-3 col-md-6 col-6">
-                            <div class="ltn__banner-item">
-                                <div class="ltn__banner-img">
-                                    <a href="{{ banner.url_address }}">
-                                        <img src="{{ banner.img.url }}" alt="Banner{{ banner.id }}">
-                                    </a>
+    <script>
+        function setDiscount(realPrice, specialPrice, elemId){
+            let discountElements = document.getElementsByClassName(`product${elemId}`);
+            let discountPrice = realPrice - specialPrice
+            let discountPercent = (discountPrice * 100) / realPrice
+            discountPercent = Math.round(discountPercent)
+            for (let elem of discountElements){
+                elem.innerHTML = `${discountPercent}% تخفیف`;
+            }
+        }
+    </script>
+    <!-- start main slider -->
+    <div class="main-slider py-20">
+        <div class="container-fluid">
+            <div class="row gy-3">
+                <div class="col-lg-3 order-lg-1 order-2">
+                {% if products %}
+                    <div class="swiper" id="suggetMoment">
+                        <div class="swiper-wrapper position-relative">
+                            {% for product in products %}
+                                {% if product.special_price and product.status %}
+                                <div class="swiper-slide">
+                                    <div class="product-box">
+                                        <div class="product-timer">
+                                            <div class="timer-label">
+                                                <span class="product{{ product.id }}"></span>
+                                                <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
+                                            </div>
+                                            <div class="timer">
+                                                <div class='countdown'
+                                                     data-url="{% url "main:countdown_end" %}"
+                                                     data-id="{{ product.id }}"
+                                                     data-date="{{ product.remaining_time|date:'Y-m-d' }}"
+                                                     data-time="23:59">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="product-image">
+                                            <a href="{% url 'product:productDetail_page' product.id product.slug %}">
+                                            {% for product_image in product.images.all|slice:':1' %}
+                                                <img src="{{ product_image.img.url }}" loading="lazy"
+                                                     alt="{{ product.product_name }}" class="img-fluid" title="{{ product.product_name }}">
+                                            {% endfor %}
+                                            </a>
+                                        </div>
+                                        <div class="product-title">
+                                            <div class="title">
+                                                <a href="{% url 'product:productDetail_page' product.id product.slug %}" title="مشاهده جزئیات محصول">
+                                                    <p class="text-overflow-1">{{ product.product_name }}</p>
+                                                    <span class="text-muted text-overflow-1">{{ product.subtitle }}</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="product-action">
+                                            <div class="price">
+                                                <p class="new-price">{{ product.special_price|intcomma:False }} تومان</p>
+                                                <p class="old-price">{{ product.price|intcomma:False }} تومان</p>
+                                            </div>
+                                            <div class="link">
+                                                <a href="{% url 'cart:addToCart' product.id %}" class="btn border-0 rounded-3 main-color-one-bg" title="افزودن به سبد خرید">
+                                                    <i class="bi bi-basket text-white"></i>
+                                                    <span class="text-white">خرید محصول</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="swiper-progress-bar">
+                            <span class="slide_progress-bar"></span>
+                        </div>
+                    </div>
+                {% endif %}
+                </div>
+                {% if sliderBannerImages %}
+                    <div class="col-lg-9 order-lg-2 order-1">
+                        <div class="slider shadow-box">
+                            <div class="swiper" id="homeSlider">
+                                <div class="swiper-wrapper">
+                                    {% for image in sliderBannerImages %}
+                                        <div class="swiper-slide">
+                                            {% if image.url_address %}
+                                                <a href="{{ image.url_address }}">
+                                                    <img src="{{ image.img.url }}" loading="lazy" class="img-fluid" alt="banner slider{{ image.sort_number }}">
+                                                </a>
+                                            {% else %}
+                                                <img src="{{ image.img.url }}" loading="lazy" class="img-fluid" alt="banner slider{{ image.sort_number }}">
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="swiper-button-next d-lg-flex d-none"></div>
+                                <div class="swiper-button-prev d-lg-flex d-none"></div>
+                                <div class="swiper-pagination"></div>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- end main slider -->
+
+    <!-- start company logo -->
+    {% if companiesLogo %}
+        <div class="service">
+            <div class="container-fluid">
+                <div class="row gy-3 justify-content-between align-items-center">
+                    <div class="col-lg-3">
+                        <div class="service-title">
+                            <h6 class="font-25 text-white mb-3">بیش از 100 محصول</h6>
+                            <p class="mb-0 text-white font-13">برترین برندهای اصلی و داخلی</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-9">
+                        <div class="row gy-2 gx-2 service-logo justify-content-md-end justify-content-center align-items-center">
+                            {% for logo in companiesLogo %}
+                                <div class="col-md-2 col-4 item">
+                                    {% if logo.url_address %}
+                                        <a href="{{ logo.url_address }}" title="{{ logo.brand_name }}">
+                                            <img src="{{ logo.img.url }}" alt="لوگو {{ logo.brand_name }}" class="img-fluid">
+                                        </a>
+                                    {% else %}
+                                        <img src="{{ logo.img.url }}" alt="لوگو {{ logo.brand_name }}" title="{{ logo.brand_name }}" class="img-fluid">
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     {% endif %}
-    <!-- BANNER AREA END -->
+    <!-- end company logo -->
 
-    <script>
-        function setDiscount(realPrice, specialPrice, elemId){
-            let newPriceElements = document.getElementsByClassName(`product${elemId}`);
-            let discountPrice = realPrice - specialPrice
-            let discountPercent = (discountPrice * 100) / realPrice
-            discountPercent = Math.floor(discountPercent)
-            for (let elem of newPriceElements){
-                elem.innerHTML = `${discountPercent}%`;
-            }
-        }
-    </script>
-
-<!-- PRODUCT SLIDER AREA START -->
-    {% if products %}
-    <div class="ltn__product-slider-area ltn__product-gutter  pt-10 pb-10" style="background-color: #d33253">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title-area text-center">
-                        <h3 class="section-title section-title-border text-light">پیشنهادهای برگزیده</h3>
-                        <a href="{% url 'product:shop_page' %}" class="text-light" style="text-decoration: underline">مشاهده همه</a>
+    <!-- start category -->
+    {% if categories %}
+        <div class="category py-20">
+            <div class="container-fluid">
+                <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
+                    <div class="title d-flex align-items-center">
+                        <img src="{% static 'image/square.png' %}" alt="square1" class="img-fluid">
+                        <h5 class="font-16 ms-3">دسته بندی<span class="main-color-one-color d-inline-block ms-1">محصولات</span></h5>
+                    </div>
+                </div>
+                <div class="category-items">
+                    <div class="row gy-3 justify-content-center">
+                        {% for category in categories %}
+                        <div class="col-lg-3 col-sm-6 col-12">
+                            <div class="category-item p-3 rounded-3 bg-white shadow-box">
+                                <a href="{% url 'product:categoryDetails_page' category.id category.slug %}">
+                                    <div class="d-flex align-items-center justify-content-md-flex-start justify-content-between">
+                                        <div class="image">
+                                            <img src="{{ category.icon.url }}" alt="{{ category.title }}" class="img-fluid">
+                                        </div>
+                                        <div class="text ms-3">
+                                            <p class="text-center font-14 text-overflow-1">{{ category.title }}</p>
+                                            <a href="{% url 'product:categoryDetails_page' category.id category.slug %}"
+                                               class="btn text-muted-two btn-sm font-14 px-3 light-btn shadow-sm">
+                                                <span>مشاهده</span>
+                                                <i class="bi bi-chevron-double-left font-16 main-color-one-color ms-2"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-            <div class="row ltn__product-slider-item-four-active slick-arrow-1">
-                <!-- ltn__product-item -->
-                {% for product in products %}
-                    {% if product.remaining_time or product.selected_product %}
-                        <div class="col-12" style="padding-right: 2px; padding-left: 2px">
-                            <div class="ltn__product-item text-center">
-                                <div class="product-img">
-                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}">
-                                        {% for product_image in product.images.all|slice:':1' %}
-                                            <img src="{{ product_image.img.url }}" alt="{{ product.product_name }}">
-                                        {% endfor %}
-                                    </a>
+        </div>
+    {% endif %}
+    <!-- end category -->
 
-                                    <div class="product-badge">
-                                        <ul>
+    <!-- start product slider -->
+    {% if products %}
+    <div class="product-slider site-slider theme-2 py-20">
+        <div class="container-fluid">
+            <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
+                <div class="title d-flex align-items-center">
+                    <img src="{% static 'image/square.png' %}" alt="square2" class="img-fluid">
+                    <h5 class="font-16 ms-3"><span class="main-color-one-color d-inline-block ms-1">اسلایدر</span> شگفت انگیز</h5>
+                </div>
+                <div class="link">
+                    <a href="{% url 'product:shop_page' %}" class="border-animate fromCenter pb-1 fw-bold">مشاهده همه
+                        <i class="bi bi-chevron-double-left main-color-one-color"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="parent">
+            <div class="container-fluid">
+                <div class="swiper" id="product-slider">
+                    <div class="swiper-wrapper">
+                        {% for product in products %}
+                            {% if product.status %}
+                                <div class="swiper-slide">
+                                    <div class="product-box ">
+                                        <div class="product-timer">
+                                            {% if product.special_price %}
+                                                <div class="timer-label">
+                                                    <span class="product{{ product.id }}"></span>
+                                                    <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
+                                                </div>
+                                            {% endif %}
                                             {% if product.selected_product %}
-                                                <li class="m-0 badge-1">برگزیده</li>
+                                                <div>
+                                                    <img src="{% static 'image/star.png' %}" class="img-fluid" width="31px" alt="star logo" title="محصول برگزیده">
+                                                </div>
                                             {% endif %}
-                                            {% if product.special_price and product.status %}
-                                                <li class="m-0 badge-2 product{{ product.id }}"></li>
-                                                <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
-                                            {% endif %}
-                                        </ul>
-                                    </div>
-
-                                    <div class="product-hover-action product-hover-action-2">
-                                        <ul>
-                                            <li>
-                                                <a href="{% url 'product:productDetail_page' product.id product.slug %}"
-                                                   title="مشاهده">
-                                                    <i class="icon-magnifier"></i>
-                                                </a>
-                                            </li>
-                                            <li class="add-to-cart">
-                                                {% if product.status %}
-                                                    <a href="{% url 'cart:addToCart' product.id %}" title="Add to Cart">
-                                                        <span class="cart-text d-none d-xl-block">افزودن به سبد خرید</span>
-                                                        <span class="d-block d-xl-none">
-                                                            <i class="icon-handbag"></i>
-                                                        </span>
+                                        </div>
+                                        <a href="{% url 'product:productDetail_page' product.id product.slug %}" title="{{ product.product_name }}">
+                                            <div class="product-image">
+                                                {% if product.images.count > 1 %}
+                                                    {% for image in product.images.all|slice:':2' %}
+                                                        <img src="{{ image.img.url }}" loading="lazy"
+                                                             alt="{{ product.product_name }}{% cycle '1' '2' %}"
+                                                             class="img-fluid {% cycle 'one-image' 'two-image' %}"
+                                                        >
+                                                    {% endfor %}
+                                                {% else %}
+                                                    {% for image in product.images.all|slice:':1' %}
+                                                        <img src="{{ image.img.url }}" loading="lazy" alt="{{ product.product_name }}" class="img-fluid">
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                        <div class="product-title">
+                                            <a href="{% url 'product:productDetail_page' product.id product.slug %}">
+                                                <div class="title">
+                                                    <p class="text-overflow-1">{{ product.product_name }}</p>
+                                                    {% if product.subtitle %}
+                                                        <span class="text-muted text-overflow-1">{{ product.subtitle }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="product-action">
+                                            <div class="price">
+                                                {% if product.special_price %}
+                                                    <p class="new-price">{{ product.special_price|intcomma:False }} تومان</p>
+                                                    <p class="old-price">{{ product.price|intcomma:False }} تومان</p>
+                                                {% else %}
+                                                    <p class="new-price">{{ product.price|intcomma:False }} تومان</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="link">
+                                                {% if product.disable_order %}
+                                                    <a href="#" onclick="disableOrder()" class="btn border-0 rounded-3 main-color-one-bg" role="button">
+                                                        <i class="bi bi-basket text-white"></i>
+                                                        <span class="text-white">خرید محصول</span>
                                                     </a>
                                                 {% else %}
-                                                    <a>
-                                                        <span class="cart-text d-none d-xl-block" style="color: red">محصول موجود نمی باشد</span>
-                                                        <span class="d-block d-xl-none"><i class="icon-handbag"></i></span>
+                                                    <a href="{% url 'cart:addToCart' product.id %}" class="btn border-0 rounded-3 main-color-one-bg" role="button">
+                                                        <i class="bi bi-basket text-white"></i>
+                                                        <span class="text-white">خرید محصول</span>
                                                     </a>
                                                 {% endif %}
-                                            </li>
-                                        </ul>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="product-info" style="background-color: #eaeaea; height: 100px">
-                                    <h1 class="product-title">
-                                        <a href="{% url 'product:productDetail_page' product.id product.slug %}">{{ product.product_name }}</a>
-                                    </h1>
-                                    <div class="product-price">
-                                        {% if product.status %}
-                                            {% if not product.special_price %}
-                                                <span>{{ product.price|intcomma:False }} تومان</span>
-                                            {% else %}
-                                                <span>{{ product.special_price|intcomma:False }} تومان</span>
-                                                <del>{{ product.price|intcomma:False }} تومان</del>
-                                            {% endif %}
-                                        {% else %}
-                                            <span style="color: #b00;">محصول موجود نمی باشد</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- end product slider -->
+
+    <!-- start banner -->
+    {% if sectionOneBanners %}
+    <div class="banner py-20">
+        <div class="container-fluid">
+            <div class="row g-3">
+                {% for banner in sectionOneBanners %}
+                    <div class="col-lg-3 col-6">
+                    {% if banner.url_address %}
+                        <a href="{{ banner.url_address }}">
+                            <img src="{{ banner.img.url }}" class="img-fluid rounded-3 shadow-box" alt="banner{{ banner.id }}">
+                        </a>
+                    {% else %}
+                        <img src="{{ banner.img.url }}" class="img-fluid rounded-3 shadow-box" alt="banner{{ banner.id }}">
                     {% endif %}
+                    </div>
                 {% endfor %}
             </div>
         </div>
     </div>
     {% endif %}
-    <!-- PRODUCT SLIDER AREA END -->
+    <!-- end banner -->
 
-    <!-- BANNER AREA START -->
-    {% if sectionTwoBanner %}
-        <div class="ltn__banner-area mt-md-4">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="ltn__banner-item">
-                            <div class="ltn__banner-img">
-                                <a href="{{ sectionTwoBanner.url_address }}">
-                                        <img src="{{ sectionTwoBanner.img.url }}" alt="BannerSectionTwo">
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+    <!-- start backpack slider -->
+    {% if backpacks %}
+    <div class="product-slider site-slider theme-3 py-20">
+        <div class="container-fluid">
+            <div class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
+                <div class="title d-flex align-items-center">
+                    <img src="{% static 'image/square.png' %}" alt="square2" class="img-fluid">
+                    <h5 class="font-16 ms-3"><span class="main-color-one-color d-inline-block ms-1">کوله</span> پشتی</h5>
+                </div>
+                <div class="link">
+                    <a href="{% url 'product:shop_page' %}?tag=کوله-پشتی" class="border-animate fromCenter pb-1 fw-bold">مشاهده همه
+                        <i class="bi bi-chevron-double-left main-color-one-color"></i>
+                    </a>
                 </div>
             </div>
         </div>
-    {% endif %}
-    <!-- BANNER AREA END -->
 
-    <!-- blog AREA START (blog-3) -->
-    {% if blogs %}
-        <div class="ltn__blog-area pb-10" style="background-color: #0E1953">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="section-title-area text-center">
-                            <h3 class="section-title section-title-border2 text-light">مقالات اچ ام الکترونیک</h3>
-                        </div>
+        <div class="parent">
+            <div class="container-fluid">
+                <div class="swiper" id="product-slider">
+                    <div class="swiper-wrapper">
+                        {% for product in backpacks %}
+                            <div class="swiper-slide">
+                                <div class="product-box ">
+                                    <div class="product-timer">
+                                        {% if product.special_price %}
+                                            <div class="timer-label">
+                                                <span class="product{{ product.id }}"></span>
+                                                <script>setDiscount({{ product.price }}, {{ product.special_price }}, {{ product.id }})</script>
+                                            </div>
+                                        {% endif %}
+                                        {% if product.selected_product %}
+                                            <div>
+                                                <img src="{% static 'image/star.png' %}" class="img-fluid" width="31px" alt="star logo" title="محصول برگزیده">
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{% url 'product:productDetail_page' product.id product.slug %}" title="{{ product.product_name }}">
+                                        <div class="product-image">
+                                            {% if product.images.count > 1 %}
+                                                {% for image in product.images.all|slice:':2' %}
+                                                    <img src="{{ image.img.url }}" loading="lazy"
+                                                         alt="{{ product.product_name }}{% cycle '1' '2' %}"
+                                                         class="img-fluid {% cycle 'one-image' 'two-image' %}"
+                                                    >
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for image in product.images.all|slice:':1' %}
+                                                    <img src="{{ image.img.url }}" loading="lazy" alt="{{ product.product_name }}" class="img-fluid">
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </a>
+                                    <div class="product-title">
+                                        <a href="{% url 'product:productDetail_page' product.id product.slug %}">
+                                            <div class="title">
+                                                <p class="text-overflow-1">{{ product.product_name }}</p>
+                                                {% if product.subtitle %}
+                                                    <span class="text-muted text-overflow-1">{{ product.subtitle }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="product-action">
+                                        <div class="price">
+                                            {% if product.special_price %}
+                                                <p class="new-price">{{ product.special_price|intcomma:False }} تومان</p>
+                                                <p class="old-price">{{ product.price|intcomma:False }} تومان</p>
+                                            {% else %}
+                                                <p class="new-price">{{ product.price|intcomma:False }} تومان</p>
+                                            {% endif %}
+                                        </div>
+                                        <div class="link">
+                                            {% if product.disable_order %}
+                                                <a href="#" onclick="disableOrder()" class="btn border-0 rounded-3 main-color-one-bg" role="button">
+                                                    <i class="bi bi-basket text-white"></i>
+                                                    <span class="text-white">خرید محصول</span>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'cart:addToCart' product.id %}" class="btn border-0 rounded-3 main-color-one-bg" role="button">
+                                                    <i class="bi bi-basket text-white"></i>
+                                                    <span class="text-white">خرید محصول</span>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
                 </div>
-                <div class="row ltn__blog-slider-one-active slick-arrow-1">
-                    <!-- blog Item -->
-                    {% for blog in blogs %}
-                        <div class="col-lg-12">
-                            <div class="ltn__blog-item">
-                                <div class="ltn__blog-img">
-                                    <a href="{% url 'blog:detail' blog.slug %}">
-                                        <img src="{{ blog.img.url }}" alt="{{ blog.title }}">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- end backpack slider -->
+
+    <!-- start blog -->
+    {% if blogs %}
+    <div class="blog-slider site-slider site-slider-sm py-20" style="margin-top: 40px;">
+        <div class="container-fluid">
+            <div
+                class="header-content mb-4 bg-white shadow-box rounded-3 p-3 d-flex align-items-center justify-content-between flex-wrap">
+                <div class="title d-flex align-items-center">
+                    <img src="{% static 'image/square.png' %}" alt="square3" class="img-fluid">
+                    <h5 class="font-16 ms-3">آخرین مطالب <span class="main-color-one-color d-inline-block">وبلاگ</span></h5>
+                </div>
+                <div class="link">
+                    <a href="{% url 'blog:list' %}" class="border-animate fromCenter pb-1 fw-bold">
+                        مشاهده همه
+                        <i class="bi bi-chevron-double-left main-color-one-color"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="parent">
+            <div class="container-fluid">
+                <div class="swiper" id="product-slider">
+                    <div class="swiper-wrapper">
+                        {% for blog in blogs %}
+                            <div class="swiper-slide">
+                                <div class="blog-item">
+                                    <a href="{% url 'blog:detail' blog.slug %}" title="{{ blog.title }}">
+                                        <div class="image">
+                                            <img {% if blog.img %}src="{{ blog.img.url }}"{% endif %} alt="{{ blog.title}}" class="img-fluid">
+                                        </div>
+                                        <div class="title">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="title-item">
+                                                    <i class="bi bi-person me-1"></i>
+                                                    <span class="font-12">{{ blog.author }}</span>
+                                                </div>
+                                                <div class="title-item">
+                                                    <i class="bi bi-alarm me-1"></i>
+                                                    <span class="font-12">{{ blog.created_at|jformat:"%Y/%m/%d" }}</span>
+                                                </div>
+                                            </div>
+                                            <h4 class="font-16 text-overflow-1 h4">{{ blog.title }}</h4>
+                                        </div>
                                     </a>
                                 </div>
-                                <div class="ltn__blog-brief">
-                                    <div class="ltn__blog-meta">
-                                        <ul class="text-warning">
-                                            <li class="ltn__blog-author">
-                                                <span>{{ blog.author }}</span>
-                                            </li>
-                                            <li>
-                                                <span> {{ blog.created_at|jformat:"%Y/%m/%d" }}</span>
-                                            </li>
-                                            <li class="ltn__blog-comment">
-                                                <span><i class="icon-speech"></i> {{ blog.comments.count }}</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <h2 class="ltn__blog-title blog-title-line">
-                                        <a href="{% url 'blog:detail' blog.slug %}">{{ blog.title }}</a>
-                                    </h2>
-                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
                 </div>
             </div>
         </div>
+    </div>
     {% endif %}
-    <!-- blog AREA END -->
+    <!-- end blog -->
 {% endblock %}

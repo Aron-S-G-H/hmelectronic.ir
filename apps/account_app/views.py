@@ -29,7 +29,6 @@ class LoginView(View):
             user = authenticate(username=data['phone'], password=data['password'])
             if user is not None:
                 login(request, user)
-                request.session.set_expiry(60 * 60 * 24)
                 return JsonResponse({'status': 200, 'firstName': user.first_name, 'lastName': user.last_name})
             return JsonResponse({'status': 401})
         errors = {field: error for field, errors in login_form.errors.items() for error in errors}
@@ -48,7 +47,6 @@ class ForgotPasswordView(View):
             except Exception as e:
                 return JsonResponse({'status': 401, 'err': 'کد وارد شده نادرست است !'})
             login(request, user)
-            request.session.set_expiry(60 * 60 * 24 * 2)
             user.one_time_password = 0
             user.save()
             return JsonResponse({'status': 200, 'firstName': user.first_name, 'lastName': user.last_name})
@@ -163,7 +161,6 @@ class CheckOtp(View):
                     password=new_user.password
                 )
                 login(request, user)
-                request.session.set_expiry(60 * 60 * 24 * 2)
                 new_user.delete()
                 return JsonResponse({'status': 200, 'fName': user.first_name, 'lName': user.last_name})
             except Exception as e:

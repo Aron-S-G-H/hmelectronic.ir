@@ -1,0 +1,83 @@
+{% extends 'templates/base.html' %}
+{% load jformat %}
+{% load humanize %}
+
+{% block head %}
+    <meta name="robots" content="noindex, nofollow" />
+    <title>فروشگاه اچ ام الکترونیک</title>
+{% endblock %}
+
+{% block main %}
+    <div class="bread-crumb pt-3">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <nav aria-label="breadcrumb" class="my-lg-0 my-2">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'main:Home_page' %}" class="font-14 text-muted">خانه</a></li>
+                        <li class="breadcrumb-item">صورت حساب</li>
+                        <li class="breadcrumb-item">انتقال به درگاه پرداخت</li>
+                        <li class="breadcrumb-item active main-color-one-color font-14" aria-current="page">نتیجه پرداخت</li>
+                    </ol>
+                </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <div class="payment-status">
+                        <div class="icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="title">
+                            <h3>پرداخت شما با موفقیت انجام شد</h3>
+                            <p>از خرید شما متشکریم :)</p>
+                        </div>
+                        <div class="pay-table">
+                            <div class="pay-table-title">
+                                <h5 class="font-18">مشخصات سفارش</h5>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16">درگاه پرداختی</h6>
+                                <p class="mb-0">ایران کیش</p>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16">تاریخ</h6>
+                                <p class="mb-0">{{ date|jformat:"%Y/%m/%d" }}</p>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16">شماره سفارش</h6>
+                                <p class="mb-0">{{ order_id }}</p>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16">RefID</h6>
+                                <p class="mb-0">{{ RefID }}</p>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16">قیمت کل</h6>
+                                <p class="mb-0">{{ total_price|intcomma:False }} تومان</p>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16">وضعیت پرداخت</h6>
+                                <p class="mb-0">پرداخت شده</p>
+                            </div>
+                            <div class="pay-table-item">
+                                <h6 class="font-16 main-color-three-color">وضعیت سفارش</h6>
+                                <p class="mb-0 main-color-three-color">تایید شده</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center my-4">
+                        <a href="{% url 'main:Home_page' %}" class="btn d-inline-block main-color-three-bg mx-auto">رفتن به صفحه اصلی</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end content -->
+{% endblock %}

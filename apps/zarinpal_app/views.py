@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.shortcuts import render
 from apps.cart_app.models import UserOrder
-from django.shortcuts import get_object_or_404
 from apps.cart_app.sms_module import send_verify_order_sms
 import requests
 from celery.result import AsyncResult
@@ -15,7 +14,7 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad
 
-
+# requests pakckage
 requests.packages.urllib3.disable_warnings()
 requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
 try:
@@ -25,14 +24,17 @@ except AttributeError:
     pass
 
 
+CallbackURL = 'https://hmelecteronic.ir/payment-gateway/verify/'
+
+
 IRAN_KISH = {
     'get_token_url': 'https://ikc.shaparak.ir/api/v3/tokenization/make',
     'post_and_redirect_url': 'https://ikc.shaparak.ir/iuiv3/IPG/Index/',
     'confirmation_url': 'https://ikc.shaparak.ir/api/v3/confirmation/purchase',
-    'call_back_url': 'http://127.0.0.1:8000/payment-gateway/verify/',
-    'terminal_id': 'Terminal ID',
-    'acceptor_id': 'Acceptor ID',
-    'pass_phrase': 'Pass Phrase',
+    'call_back_url': CallbackURL,
+    'terminal_id': 'your terminal ID',
+    'acceptor_id': 'your acceptor ID',
+    'pass_phrase': 'your pass phrase',
     'sha1_key': 'PUT YOUR SHA1_KEY  HERE',
     'rsa_public_key_file': settings.RSI_PUBLIC_KEY,
     'post_and_redirect_token_key': 'tokenIdentity'
@@ -103,7 +105,11 @@ def verify(request):
     reference_id = request.POST.get('systemTraceAuditNumber')
     if response_code == '00':
         user_order_id = request.session.get('user_order')
-        user_order = get_object_or_404(UserOrder, id=user_order_id)
+        try:
+            user_order = UserOrder.objects.get(id=user_order_id)
+        except UserOrder.DoesNotExist:
+            logging.warning(f'Verify order Error - User Order does not exists - RefID: {reference_id}')
+            user_order = None
         payload = {
             'terminalId': IRAN_KISH['terminal_id'],
             'retrievalReferenceNumber': request.POST.get('retrievalReferenceNumber'),
@@ -116,51 +122,39 @@ def verify(request):
         if r.ok:
             result = r.json()
             if result['status']:
-                user_order.is_paid = True
-                user_order.reference_id = reference_id
-                send_verify_sms = send_verify_order_sms.apply_async(
-                    (user_order.phone, reference_id),
-                    retry=False,
-                    ignore_result=False,
-                    expires=20
-                )
-                sms_result = AsyncResult(send_verify_sms.task_id)
-                try:
-                    get_sms_result = sms_result.get(timeout=30)
-                    logging.warning(get_sms_result['message'])
-                    if get_sms_result['status']:
-                        user_order.is_sms_sent = True
-                    else:
+                context = {'RefID': reference_id}
+                if user_order:
+                    user_order.is_paid = True
+                    user_order.reference_id = reference_id
+                    send_verify_sms = send_verify_order_sms.apply_async(
+                        (user_order.phone, reference_id),
+                        retry=False,
+                        ignore_result=False,
+                        expires=20
+                    )
+                    sms_result = AsyncResult(send_verify_sms.task_id)
+                    try:
+                        get_sms_result = sms_result.get(timeout=30)
+                        logging.warning(get_sms_result['message'])
+                        if get_sms_result['status']:
+                            user_order.is_sms_sent = True
+                        else:
+                            user_order.is_sms_sent = False
+                    except TimeoutError as e:
+                        logging.warning("Send Confirm SMS Task has not completed within the specified timeout")
+                        sms_result.forget()
                         user_order.is_sms_sent = False
-                except TimeoutError as e:
-                    logging.warning("Send Confirm SMS Task has not completed within the specified timeout")
-                    sms_result.forget()
-                    user_order.is_sms_sent = False
-                user_order.save()
-                context = {
-                    'stage': 'verify',
-                    'status': 'SF',  # Successful
-                    'RefID': reference_id
-                }
-                return render(request, 'zarinpal_app/response.html', context)
+                    user_order.save()
+                    context['date'] = user_order.created_at
+                    context['order_id'] = user_order_id
+                    context['total_price'] = user_order.total_price
+                return render(request, 'zarinpal_app/success.html', context)
             else:
                 logging.warning(f'Verify Order Confirmation Error, STATUS:{r.json()}, ORDER-ID:{user_order_id}')
-                context = {
-                    'stage': 'verify',
-                    'status': 'VOCE'  # Verify Order Confirmation Error
-                }
-                return render(request, 'zarinpal_app/response.html', context)
+                return render(request, 'zarinpal_app/fail.html', {'status': 'VOCE'})
         else:
             logging.warning(f'Verify Order Confirmation Error, Request-Result:{r.json()}, ORDER-ID:{user_order_id}')
-            context = {
-                'stage': 'verify',
-                'status': 'VOCE'  # Verify Order Confirmation Error
-            }
-            return render(request, 'zarinpal_app/response.html', context)
+            return render(request, 'zarinpal_app/fail.html', {'status': 'VOCE'})  # Verify Order Confirmation Error
     else:
         logging.warning(f'Verify Order Transaction Canceled, RESPONSE-CODE:{response_code}')
-        context = {
-            'stage': 'verify',
-            'status': 'CT'  # Canceled Transaction
-        }
-        return render(request, 'zarinpal_app/response.html', context)
+        return render(request, 'zarinpal_app/fail.html', {'status': 'CT'})  # Canceled Transaction

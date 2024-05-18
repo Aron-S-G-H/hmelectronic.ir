@@ -2,15 +2,13 @@ from django.shortcuts import render
 from django.views.generic import View
 from .forms import ContactUsForm
 from django.http import JsonResponse
-from apps.home_app.models import CommunicationWays
 from .tasks import send_confirm_email_admins
 
 
 class ContactUsView(View):
     def get(self, request):
-        forms = ContactUsForm()
-        communication_ways = CommunicationWays.objects.last()
-        return render(request, 'contact_app/contact.html', {'forms': forms, 'communicationWays': communication_ways})
+        form = ContactUsForm()
+        return render(request, 'contact_app/contact.html', {'form': form})
 
     def post(self, request):
         if request.user.is_authenticated:

@@ -1,5 +1,6 @@
 {% extends 'templates/base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 {% load humanize %}
 
 {% block head %}
@@ -10,148 +11,184 @@
 {% endblock %}
 
 {% block main %}
-    <!-- BREADCRUMB AREA START -->
-    <div class="ltn__breadcrumb-area ltn__breadcrumb-area-4 ltn__breadcrumb-color-white---">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__breadcrumb-inner text-center">
-                        <h1 class="ltn__page-title">بررسی </h1>
-                        <div class="ltn__breadcrumb-list">
-                            <ul>
-                                <li><a href="{% url 'main:Home_Page' %}" style="text-decoration: underline">خانه</a>
-                                    <i class="fa-solid fa-chevron-left" style="font-size: 10px;margin-right: 5px;margin-left: 3px"></i>
-                                </li>
-                                <li>تسویه حساب</li>
-                            </ul>
-                        </div>
-                    </div>
+<!-- start breadcroumb -->
+    <div class="bread-crumb pt-3">
+        <div class="container-fluid">
+            <div class="content-box">
+                <div class="container-fluid">
+                    <nav aria-label="breadcrumb" class="my-lg-0 my-2">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{% url 'main:Home_page' %}" class="font-14 text-muted">خانه</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'cart:detail_page' %}" class="font-14 text-muted">سبد خرید</a></li>
+                            <li class="breadcrumb-item active main-color-one-color font-14" aria-current="page">سبد خرید</li>
+                        </ol>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
-    <!-- BREADCRUMB AREA END -->
+    <!-- end breadcroumb -->
 
-    <!-- WISHLIST AREA START -->
-    <div class="ltn__checkout-area mb-100">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="ltn__checkout-inner">
-                        <div class="ltn__checkout-single-content mt-50">
-                            <h4 class="title-2">جزئیات صورتحساب</h4>
-                            <p class="text-center text-danger border border-danger d-none" id="error-message"></p>
-                            <div class="ltn__checkout-single-content-info">
-                                <form>
-                                    <h6>اطلاعات شخصی</h6>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="input-item input-item-name ltn__custom-icon">
-                                                {{ form.first_name|attr:"required" }}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="input-item input-item-name ltn__custom-icon">
-                                                {{ form.last_name|attr:"required" }}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="input-item input-item-email ltn__custom-icon">
-                                                {{ form.email|attr:"required" }}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="input-item input-item-phone ltn__custom-icon">
-                                                {{ form.phone|attr:"required" }}
-                                            </div>
-                                        </div>
+    <!-- start content -->
+    <div class="content">
+        <div class="container-fluid">
+            <p class="text-center text-danger rounded-3 border border-2 border-danger d-none" id="error-message"></p>
+            <div class="check-out-form">
+                <div class="row gy-3">
+                    <div class="col-lg-8">
+                        <div class="content-box position-sticky top-0">
+                            <div class="container-fluid">
+                                <div class="checkout-forms">
+                                    <div class="checkout-form-title">
+                                        <h5 class="mb-3">جزییات پرداخت</h5>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-lg-4 col-md-6">
-                                            <h6>استان</h6>
-                                            <div class="input-item">
-                                                {{ form.state|attr:'required' }}
+                                    <div class="checkout-form">
+                                        <form>
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="first_name" class="form-label">نام <span class="text-danger ms-1">*</span></label>
+                                                            {{ form.first_name|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="last_name" class="form-label">نام خانوادگی <span class="text-danger ms-1">*</span></label>
+                                                             {{ form.last_name|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4 col-md-6">
-                                            <h6>شهر</h6>
-                                            <div class="input-item">
-                                                {{ form.city|attr:"required" }}
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="email" class="form-label">ایمیل (اختیاری) </label>
+                                                            {{ form.email }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="phone" class="form-label">شماره تلفن <span class="text-danger ms-1">*</span></label>
+                                                            {{ form.phone|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4 col-md-6">
-                                            <h6>کد پستی</h6>
-                                            <div class="input-item">
-                                                {{ form.postal_code|attr:"required" }}
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="state" class="form-label">استان <span class="text-danger ms-1">*</span></label>
+                                                            {{ form.state|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="city" class="form-label">شهر <span class="text-danger ms-1">*</span></label>
+                                                            {{ form.city|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4 col-md-6">
-                                            <h6>کد ملی</h6>
-                                            <div class="input-item">
-                                                {{ form.national_code|attr:"required" }}
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="postal_code" class="form-label">کدپستی <span class="text-danger ms-1">*</span></label>
+                                                            {{ form.postal_code|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="national_code" class="form-label">کدملی <span class="text-danger ms-1">*</span></label>
+                                                            {{ form.national_code|attr:"required" }}
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-12 col-md-12">
-                                            <h6>آدرس</h6>
-                                            <div class="input-item input-item-textarea ltn__custom-icon">
+                                            <div class="form-group">
+                                                <label for="descOrder" class="form-label">آدرس<span class="text-danger ms-1">*</span></label>
                                                 {{ form.address|attr:"required" }}
                                             </div>
+                                            <div class="form-group">
+                                                <label for="note" class="form-label">یادداشت های سفارش (اختیاری)</label>
+                                                {{ form.note }}
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="checkout-side position-sticky top-0">
+                            <div class="cart-canvases mb-4">
+                                <div class="item">
+                                    <div class="factor">
+                                        <div class="title">
+                                            <div class="d-flex align-items-end">
+                                                <i class="bi bi-credit-card-2-front-fill me-2 main-color-one-color"></i>
+                                                <h6 class="font-16">انتخاب شیوه پرداخت</h6>
+                                            </div>
+                                        </div>
+                                        <div class="row gy-2">
+                                            <div class="col-12">
+                                                <div class="bank-item active">
+                                                    <i class="bi bi-credit-card-2-back main-color-one-color"></i>
+                                                    <h6 class="font-14 mx-2">انتقال مستقیم به درگاه پرداخت</h6>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <h6>یادداشت های سفارش (اختیاری)</h6>
-                                    <div class="input-item input-item-textarea ltn__custom-icon">
-                                        {{ form.note }}
+                                </div>
+                            </div>
+                            <div class="cart-canvases">
+                                <div class="item">
+                                    <div class="factor">
+                                        <div class="title">
+                                            <div class="d-flex align-items-center">
+                                                <img src="{% static 'image/shopping-bag.png' %}" class="img-fluid" alt="shopping bag">
+                                                <h6 class="font-16">سفارش شما</h6>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex mb-3 align-items-center justify-content-between">
+                                            <p class="fw-bold mb-0">محصول</p>
+                                            <p class="fw-bold mb-0">قیمت کل</p>
+                                        </div>
+                                        {% for item in cart %}
+                                        <div class="factor-item p-2 rounded-3 shadow-sm bg-light d-flex align-items-center justify-content-between">
+                                            <p class="mb-0">{{ item.product.product_name }}</p>
+                                            <p class="mb-0">{{ item.total|intcomma:False }} تومان</p>
+                                        </div>
+                                        {% endfor %}
+                                        <div class="factor-item p-2 rounded-3 shadow-sm bg-light d-flex align-items-center justify-content-between">
+                                            <p class="mb-0 fw-bold">هزینه ارسال:</p>
+                                            <p class="mb-0">برعهده خریدار</p>
+                                        </div>
+                                        <div class="factor-item p-2 rounded-3 shadow-sm bg-light d-flex align-items-center justify-content-between">
+                                            <p class="mb-0 fw-bold">جمع کل:</p>
+                                            <p class="mb-0">{{ cart.total|intcomma:False }} تومان</p>
+                                        </div>
+                                        <div class="action mt-3 d-flex align-items-center justify-content-center">
+                                            <button id="submit-btn" class="btn border-0 main-color-three-bg rounded-3 py-2 d-block w-100">پرداخت</button>
+                                        </div>
                                     </div>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="ltn__checkout-payment-method mt-50">
-                        <div class="ltn__payment-note mt-30 mb-30">
-                            <p>* اطلاعات شخصی شما برای پردازش سفارش شما، پشتیبانی از تجربه شما در سراسر این وب سایت و برای
-                                اهداف دیگری که در خط مشی رازداری ما توضیح داده شده است، استفاده می شود .
-                            </p>
-                            <p class="text-danger">* هزینه ارسال برعهده خریدار می باشد .</p>
-                        </div>
-                        <button class="btn theme-btn-1 btn-effect-1 text-uppercase" id="submit-btn" type="button">پرداخت
-                            و ثبت سفارش
-                        </button>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="shoping-cart-total mt-50">
-                        <h4 class="title-2">مجموع سبد خرید</h4>
-                        <table class="table">
-                            <tbody>
-                            {% for item in cart %}
-                                <tr>
-                                    <td>
-                                        <small>
-                                            {{ item.quantity }}×
-                                        </small>
-                                        {{ item.product.product_name }}
-                                    </td>
-                                    <td>{{ item.total|intcomma:False }} تومان</td>
-                                </tr>
-                            {% endfor %}
-                            <tr>
-                                <td><strong>مجموع سفارش:</strong></td>
-                                <td><strong>{{ cart.total|intcomma:False }} تومان</strong></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+    <!-- end content -->
     <form method="post" id="payment-form" action="https://ikc.shaparak.ir/iuiv3/IPG/Index/" enctype="multipart/form-data" class="d-none">
         <input type="hidden" name="tokenIdentity" value="">
     </form>
     <script>
-        let form = document.querySelector('.ltn__checkout-single-content-info form');
+        let form = document.querySelector('.checkout-form form');
         let submitBtn = document.getElementById('submit-btn');
         let firstNameInput = form.querySelector('#first_name');
         let lastNameInput = form.querySelector('#last_name');
@@ -180,7 +217,6 @@
 
         submitBtn.addEventListener('click', () => {
             let inputsHasValue = checkInputsValue();
-            let preLoder = $("#preloader");
             if (inputsHasValue) {
                 $.ajax({
                 url: '{% url 'cart:checkOut_page' %}',
@@ -199,13 +235,9 @@
                 },
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-                    preLoder.show()
-                },
-                complete: function () {
-                    preLoder.hide()
                 },
                 success: function(response) {
-                    if (response.status === 200){
+                    if (response.status === 200) {
                         let paymentForm = document.getElementById('payment-form');
                         let tokenIdentityInput = paymentForm.querySelector('input');
                         tokenIdentityInput.value = response.tokenIdentity;

@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from Electronic import settings
-from admin_notification.views import check_notification_view
 from apps.product_app.api import ProductApi
 from apps.product_app.sitemaps import ProductSiteMap
 from apps.blog_app.sitemaps import BlogSiteMap
@@ -29,7 +28,6 @@ urlpatterns = [
     path('cart/', include('apps.cart_app.urls')),
     path('payment-gateway/', include('apps.zarinpal_app.urls')),
     path('hitcount/', include(('hitcount.urls', 'hitcount'), namespace='hitcount')),
-    path('check/notification', check_notification_view, name="check_notifications"),
     path('robots.txt', robots, name="robots"),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

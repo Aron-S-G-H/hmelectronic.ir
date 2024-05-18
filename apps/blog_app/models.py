@@ -6,48 +6,17 @@ from django.urls import reverse
 from hitcount.models import HitCount
 from django.contrib.contenttypes.fields import GenericRelation
 from django_jalali.db.models import jDateTimeField
-from apps.product_app.mixins import MetaDescriptionMixin
+from apps.product_app.mixins import MetaDescriptionMixin, TimeStampMixin
 
 
-class Blog(MetaDescriptionMixin, models.Model):
-    author = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='نویسنده',
-        related_name='blogs'
-    )
-    title = models.CharField(
-        max_length=250,
-        verbose_name='عنوان',
-        unique=True
-    )
+class Blog(TimeStampMixin, MetaDescriptionMixin, models.Model):
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='نویسنده', related_name='blogs')
+    title = models.CharField(max_length=250, verbose_name='عنوان', unique=True, help_text='250 کاراکتر')
     description = RichTextField(verbose_name='متن')
-    img = models.ImageField(
-        upload_to='blog_image',
-        verbose_name='تصویر',
-        help_text='اندازه تصویر 1024x683px باشد',
-        blank=True,
-        null=True
-    )
-    status = models.BooleanField(
-        default=True,
-        verbose_name='وضعیت انتشار',
-        help_text='درصورت غیرفعال بودن در سایت انتشار نمی یابد'
-    )
-    slug = models.SlugField(
-        allow_unicode=True,
-        unique=True,
-        blank=True,
-        verbose_name='اسلاگ',
-        help_text='این فیلد به صورت خودکار تکمیل می شود'
-    )
-    update_at = models.DateTimeField(verbose_name='تاریخ به روزرسانی', auto_now=True)
-    created_at = models.DateTimeField(verbose_name='تاریخ ایجاد', auto_now_add=True)
-    hit_count_generic = GenericRelation(
-        HitCount,
-        object_id_field='object_pk',
-        related_query_name='hit_count_generic_relation'
-    )
+    img = models.ImageField(upload_to='blog_image', verbose_name='تصویر', help_text='اندازه تصویر : 522 × 822', blank=True, null=True)
+    status = models.BooleanField(default=True, help_text='درصورت غیرفعال بودن در سایت انتشار نمی یابد')
+    slug = models.SlugField(allow_unicode=True, unique=True, blank=True, verbose_name='اسلاگ', help_text='این فیلد به صورت خودکار تکمیل می شود')
+    hit_count_generic = GenericRelation(HitCount, object_id_field='object_pk', related_query_name='hit_count_generic_relation')
 
     def __str__(self):
         return self.title
@@ -69,28 +38,9 @@ class Blog(MetaDescriptionMixin, models.Model):
 
 
 class Comment(models.Model):
-    blog = models.ForeignKey(
-        Blog,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='مقاله',
-        help_text='کامنت مدنظر برای کدام مقاله است'
-    )
-    parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        related_name='replies',
-        verbose_name='جواب کامنت',
-        help_text='اگر این کامنت درجواب کامنت دیگری باشد تکمیل میگردد',
-        null=True,
-        blank=True
-    )
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='کاربر',
-        related_name='blog_comments'
-    )
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments', verbose_name='مقاله')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='replies', verbose_name='جواب کامنت', null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='کاربر', related_name='blog_comments')
     text = models.TextField(verbose_name='متن کامنت')
     created_at = jDateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد')
 
