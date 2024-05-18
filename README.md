@@ -17,6 +17,3 @@ Developed a fully functional e-commerce and blogging website, encompassing both 
 - Authentication system & forgot password
 - Number of Products and Blogs visit
 - Block list IPs & Block list user agents
-
-<p align="center">
-  <img src="https://github.com/Aron-S-G-H/hmelectronic.ir/blob/main/assets/hmelectronic.jpeg" width=480 height=480>
